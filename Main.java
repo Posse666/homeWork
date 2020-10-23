@@ -83,7 +83,7 @@ public class Main {
                     exit = true;
                     break;
                 default:
-                    System.out.println("Необходимо вводить варианты меню (0-8)!\nПопробуйте еще раз!");
+                    System.out.println("Необходимо вводить варианты меню (0-9)!\nПопробуйте еще раз!");
                     break;
             }
 
