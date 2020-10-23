@@ -133,7 +133,7 @@ public class Main {
         int[] arrayBounds = {0, 10};
         int[] randomArray = getRandomArray(arraySize, arrayBounds);
         System.out.println("Ваш сгенерированный массив:\t" + Arrays.toString(randomArray));
-        System.out.println("Максимальный элемент:\t" + getMaxAndMinNumber(randomArray, "Max", arraySize) + "\nМинимальный элемент:\t" + getMaxAndMinNumber(randomArray, "Min", arraySize));
+        System.out.println("Максимальный элемент:\t" + getMaxAndMinNumber(randomArray, "Max") + "\nМинимальный элемент:\t" + getMaxAndMinNumber(randomArray, "Min"));
     }
 
     private static void ex5() {
@@ -328,7 +328,8 @@ public class Main {
     }
 
 
-    private static int getMaxAndMinNumber(int[] array, String arg, int arraySize) {
+    private static int getMaxAndMinNumber(int[] array, String arg) {
+        int arraySize = array.length;
         int maxNumber = array[0];
         int minNumber = array[0];
         for (int i = 1; i < arraySize; i++) {
