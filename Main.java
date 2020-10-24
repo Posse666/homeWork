@@ -109,13 +109,16 @@ public class Main {
 
     private static void ex2() {
         int arraySize = 8;
-        int arrayStep = 3;
-        int[] arrayBounds = {1, 22};
-        int indexCounter = 0;
         int[] arrayForEx2 = new int[arraySize];
-        for (int i = arrayBounds[0]; i <= arrayBounds[1]; i = i + arrayStep) {
-            arrayForEx2[indexCounter] = i;
-            indexCounter++;
+//        int arrayStep = 3;
+//        int[] arrayBounds = {1, 22};
+//        int indexCounter = 0;
+//        for (int i = arrayBounds[0]; i <= arrayBounds[1]; i = i + arrayStep) {
+//            arrayForEx2[indexCounter] = i;
+//            indexCounter++;
+//        }
+        for (int i = 0; i < arraySize; i++) {
+            arrayForEx2[i] = i * 3 + 1;
         }
         System.out.println("Ваш массив через метод:\t" + Arrays.toString(arrayForEx2));
     }
