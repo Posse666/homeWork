@@ -350,11 +350,12 @@ public class Main {
     private static int[] revertArray(int[] array) {
         int arraySize = array.length;
         for (int i = 0; i < arraySize; i++) {
-            if (array[i] == 0) {
-                array[i] = 1;
-            } else {
-                array[i] = 0;
-            }
+            array[i] = Math.abs((array[i] - 1));
+//            if (array[i] == 0) {
+//                array[i] = 1;
+//            } else {
+//                array[i] = 0;
+//            }
         }
         return array;
     }
