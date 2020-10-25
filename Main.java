@@ -49,7 +49,9 @@ public class Main {
             System.out.println(fullMessage);
             System.out.print("Выберите ДЗ, которое желаете проверить: ");
             int userChoice = getUserNumber();
-            System.out.println(message[userChoice] + "\n");
+            if (userChoice >= 0 && userChoice < message.length) {
+                System.out.println(message[userChoice] + "\n");
+            }
 
             switch (userChoice) {
                 case 1:
@@ -83,7 +85,7 @@ public class Main {
                     exit = true;
                     break;
                 default:
-                    System.out.println("Необходимо вводить варианты меню (0-9)!\nПопробуйте еще раз!");
+                    System.out.println("\nНеобходимо вводить варианты меню (0-9)!\nПопробуйте еще раз!");
                     break;
             }
 
@@ -230,7 +232,7 @@ public class Main {
                             sameNumbers++;
                         }
                     }
-                    if (sameNumbers == Math.pow(array1Size,2)) {
+                    if (sameNumbers == Math.pow(array1Size, 2)) {
                         return true;
                     }
                 }
