@@ -3,7 +3,7 @@ package hw3;
 import java.util.*;
 
 public class Game {
-    //    private static final Scanner SCANNER = new Scanner(System.in);
+    private static final Scanner SCANNER = new Scanner(System.in);
     private static final Random RANDOM = new Random();
     private static final Map<Integer, int[]> compMoves = new HashMap<>();
     private static final Map<Integer, int[]> userMoves = new HashMap<>();
@@ -115,10 +115,15 @@ public class Game {
     }
 
     private static int getUserNumber() {
-        Scanner scanner = new Scanner(System.in);
-        if (scanner.hasNextInt()) return scanner.nextInt();
-//        if (SCANNER.hasNextInt()) return SCANNER.nextInt();
-        return -1;
+        return checkUserInput(SCANNER.nextLine());
+    }
+
+    private static int checkUserInput(String number) {
+        try {
+            return Integer.parseInt(number);
+        } catch (NumberFormatException e) {
+            return -1;
+        }
     }
 
     private static boolean isUsedCell(int y, int x) {
