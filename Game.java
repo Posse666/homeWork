@@ -1,5 +1,3 @@
-package hw3;
-
 import java.util.*;
 
 public class Game {
@@ -43,6 +41,20 @@ public class Game {
             System.out.print("До сколько клеток в ряд будем играть? (3-" + maxCount + "): ");
             gameWinCount = getUserNumber();
         } while (gameWinCount < 3 || gameWinCount > maxCount);
+        int difficulty;
+        do {
+            System.out.print("Введите сложность: 1 - Легко(Рандом), 2 - Нормально(Комп закрывает ходы) 3 - Тяжело(Еще и сам пытается выиграть): ");
+            difficulty = getUserNumber();
+            switch (difficulty) {
+                case 1:
+                    easy = true;
+                    break;
+                case 3:
+                    hard = true;
+                case 2:
+                    normal = true;
+            }
+        } while (difficulty < 1 || difficulty > 3);
     }
 
     private static void fieldInit() {
@@ -133,8 +145,6 @@ public class Game {
     private static void computerTurn() {
         int compMaxIndex = 0;
         int userMaxIndex = 0;
-        normal = true;
-        hard = true;
         if (easy) {
             do {
                 compPrevPos[0] = RANDOM.nextInt(fieldSize);
@@ -169,6 +179,7 @@ public class Game {
         x = compCurrentPos[1];
         compMoves.clear();
         userMoves.clear();
+        System.out.println("\nА я пойду: X - " + (x + 1) + ", Y - " + (y + 1) + "\n");
     }
 
     static void checkRaw() {
