@@ -1,3 +1,5 @@
+package hw3;
+
 import java.util.*;
 
 public class Game {
@@ -11,16 +13,23 @@ public class Game {
     private static final int[] prevPos = new int[2];
     private static final int MAX_FIELD_SIZE = 9;
     private static final int MAX_WIN_COUNT = 5;
+    private static final int ILLEGAL_ARRAY_ARGUMENT = -1;
+    private static final char userChar = 'X';
+    private static final char compChar = 'O';
+    private static final char emptyChar = '_';
+    private static final int INDEX_X = 1;
+    private static final int INDEX_Y = 0;
+    private static int numberOfCheckedRows = 0;
     private static int[] userCurrentPos = new int[2];
     private static int[] compCurrentPos = new int[2];
     private static int userRaw;
     private static int compRaw;
     private static int fieldSize;
     private static int gameWinCount;
-    private static Chars[][] cells;
+    private static char[][] cells;
     private static int x;
     private static int y;
-    private static Chars currentChar = Chars.O;
+    private static char currentChar = compChar;
     private static boolean easy;
     private static boolean normal;
     private static boolean hard;
@@ -59,10 +68,10 @@ public class Game {
     }
 
     private static void fieldInit() {
-        cells = new Chars[fieldSize][fieldSize];
+        cells = new char[fieldSize][fieldSize];
         for (int i = 0; i < fieldSize; i++) {
             for (int j = 0; j < fieldSize; j++) {
-                cells[i][j] = Chars._;
+                cells[i][j] = emptyChar;
             }
         }
     }
@@ -74,17 +83,17 @@ public class Game {
             showField();
             makeMove();
         }
-        currentChar = Chars._;
+        currentChar = emptyChar;
         finalMessage();
     }
 
     private static void chooseWhomTurnNext() {
-        if (currentChar == Chars.O) currentChar = Chars.X;
-        else currentChar = Chars.O;
+        if (currentChar == compChar) currentChar = userChar;
+        else currentChar = compChar;
     }
 
     private static void makeMove() {
-        if (currentChar == Chars.X) userTurn();
+        if (currentChar == userChar) userTurn();
         else computerTurn();
         compMoves.clear();
         userMoves.clear();
@@ -93,32 +102,30 @@ public class Game {
 
     private static void userTurn() {
         int userX, userY;
-        boolean errorInput;
         String errorInputMessage = "Необходимо вводить верные значения 1-" + fieldSize;
 
         do {
             System.out.println("Последовательно введите координаты хода:");
-            do {
-                errorInput = false;
-                System.out.print("Введите координату Х: ");
-                userX = getUserNumber() - 1;
-                if (userX < 0 || userX >= fieldSize) {
-                    System.out.println(errorInputMessage);
-                    errorInput = true;
-                }
-            } while (errorInput);
-            do {
-                errorInput = false;
-                System.out.print("Введите координату Y: ");
-                userY = getUserNumber() - 1;
-                if (userY < 0 || userY >= fieldSize) {
-                    System.out.println(errorInputMessage);
-                    errorInput = true;
-                }
-            } while (errorInput);
+            userX = getUserCoordinates(errorInputMessage, "Введите координату Х: ");
+            userY = getUserCoordinates(errorInputMessage, "Введите координату Y: ");
         } while (isUsedCell(userY, userX));
         y = userY;
         x = userX;
+    }
+
+    private static int getUserCoordinates(String errorInputMessage, String inputMessage) {
+        boolean errorInput;
+        int userInput;
+        do {
+            errorInput = false;
+            System.out.print(inputMessage);
+            userInput = getUserNumber() - 1;
+            if (userInput < 0 || userInput >= fieldSize) {
+                System.out.println(errorInputMessage);
+                errorInput = true;
+            }
+        } while (errorInput);
+        return userInput;
     }
 
     private static int getUserNumber() {
@@ -129,12 +136,12 @@ public class Game {
         try {
             return Integer.parseInt(number);
         } catch (NumberFormatException e) {
-            return -1;
+            return ILLEGAL_ARRAY_ARGUMENT;
         }
     }
 
     private static boolean isUsedCell(int y, int x) {
-        return cells[y][x] != Chars._;
+        return cells[y][x] != emptyChar;
     }
 
     private static void computerTurn() {
@@ -142,9 +149,9 @@ public class Game {
         int userMaxIndex = 0;
         if (easy) {
             do {
-                compPrevPos[0] = RANDOM.nextInt(fieldSize);
-                compPrevPos[1] = RANDOM.nextInt(fieldSize);
-            } while (isUsedCell(compCurrentPos[0], compPrevPos[1]));
+                compPrevPos[INDEX_Y] = RANDOM.nextInt(fieldSize);
+                compPrevPos[INDEX_X] = RANDOM.nextInt(fieldSize);
+            } while (isUsedCell(compCurrentPos[INDEX_Y], compPrevPos[INDEX_X]));
         }
         if (normal) {
             for (int i = gameWinCount - 1; i >= 0; i--) {
@@ -165,8 +172,8 @@ public class Game {
             }
             if (compMaxIndex - 1 != gameWinCount) {
                 if (userMaxIndex > compMaxIndex) {
-                    compCurrentPos[0] = userCurrentPos[0];
-                    compCurrentPos[1] = userCurrentPos[1];
+                    compCurrentPos[INDEX_Y] = userCurrentPos[INDEX_Y];
+                    compCurrentPos[INDEX_X] = userCurrentPos[INDEX_X];
                 }
             }
         }
@@ -176,22 +183,34 @@ public class Game {
     }
 
     static void checkRaw() {
-        ArrayList<Integer> randomCheck = getRandomNumbers();
-        for (Integer randomNumber : randomCheck) {
-            switch (randomNumber) {
-                case 1:
-                    checkDiagonal();
-                    break;
-                case 2:
-                    checkReversDiagonal();
-                    break;
-                case 3:
-                    checkHorizontal();
-                    break;
-                case 4:
-                    checkVertical();
+        int maxWaysToCheck = 4;
+        boolean check1completed = false;
+        boolean check2completed = false;
+        boolean check3completed = false;
+        boolean check4completed = false;
+        do {
+            int randomNumber = RANDOM.nextInt(maxWaysToCheck) + 1;
+            if (randomNumber == 1 && !check1completed) {
+                checkDiagonal();
+                check1completed = true;
+                numberOfCheckedRows++;
             }
-        }
+            if (randomNumber == 2 && !check2completed) {
+                checkReversDiagonal();
+                check2completed = true;
+                numberOfCheckedRows++;
+            }
+            if (randomNumber == 3 && !check3completed) {
+                checkHorizontal();
+                check3completed = true;
+                numberOfCheckedRows++;
+            }
+            if (randomNumber == 4 && !check4completed) {
+                checkVertical();
+                check4completed = true;
+                numberOfCheckedRows++;
+            }
+        } while (numberOfCheckedRows >= maxWaysToCheck);
     }
 
     private static void checkDiagonal() {
@@ -243,94 +262,74 @@ public class Game {
     }
 
     private static void getBestMove(int y, int x) {
-        if (cells[y][x] == Chars._) {
-            userCurrentPos[0] = y;
-            userCurrentPos[1] = x;
-            compCurrentPos[0] = y;
-            compCurrentPos[1] = x;
+        if (cells[y][x] == emptyChar) {
+            userCurrentPos[INDEX_Y] = y;
+            userCurrentPos[INDEX_X] = x;
+            compCurrentPos[INDEX_Y] = y;
+            compCurrentPos[INDEX_X] = x;
             if (userRaw == 0) {
-                userPrevPos[0] = y;
-                userPrevPos[1] = x;
+                userPrevPos[INDEX_Y] = y;
+                userPrevPos[INDEX_X] = x;
             }
             if (compRaw == 0) {
-                compPrevPos[0] = y;
-                compPrevPos[1] = x;
+                compPrevPos[INDEX_Y] = y;
+                compPrevPos[INDEX_X] = x;
             }
             if (userRaw > 0) {
-                if (RANDOM.nextInt(3) > 0 && userPrevPos[0] >= 0 && userPrevPos[1] >= 0)
-                    userMoves.put(userRaw, new int[]{userPrevPos[0], userPrevPos[1]});
-                else userMoves.put(userRaw, new int[]{userCurrentPos[0], userCurrentPos[1]});
+                if (RANDOM.nextInt(3) > 0 && userPrevPos[INDEX_Y] >= 0 && userPrevPos[INDEX_X] >= 0)
+                    userMoves.put(userRaw, new int[]{userPrevPos[INDEX_Y], userPrevPos[INDEX_X]});
+                else userMoves.put(userRaw, new int[]{userCurrentPos[INDEX_Y], userCurrentPos[INDEX_X]});
             }
             if (compRaw > 0) {
-                if (RANDOM.nextInt(3) > 0 && compPrevPos[0] >= 0 && compPrevPos[1] >= 0)
-                    compMoves.put(compRaw, new int[]{compPrevPos[0], compPrevPos[1]});
-                else compMoves.put(compRaw, new int[]{compCurrentPos[0], compCurrentPos[1]});
+                if (RANDOM.nextInt(3) > 0 && compPrevPos[INDEX_Y] >= 0 && compPrevPos[INDEX_X] >= 0)
+                    compMoves.put(compRaw, new int[]{compPrevPos[INDEX_Y], compPrevPos[INDEX_X]});
+                else compMoves.put(compRaw, new int[]{compCurrentPos[INDEX_Y], compCurrentPos[INDEX_X]});
             }
             userRaw = 0;
             compRaw = 0;
         }
-        if (cells[y][x] == Chars.X) {
-            if (cells[prevPos[0]][prevPos[1]] == Chars.O) {
-                userPrevPos[0] = -1;
-                userPrevPos[1] = -1;
-            }
+        if (cells[y][x] == userChar) {
+            if (cells[prevPos[INDEX_Y]][prevPos[INDEX_X]] == compChar) Arrays.fill(userPrevPos, ILLEGAL_ARRAY_ARGUMENT);
             userRaw++;
-            if (compPrevPos[0] >= 0 && compPrevPos[1] >= 0)
-                compMoves.put(compRaw, new int[]{compPrevPos[0], compPrevPos[1]});
+            if (compPrevPos[INDEX_Y] >= 0 && compPrevPos[INDEX_X] >= 0)
+                compMoves.put(compRaw, new int[]{compPrevPos[INDEX_Y], compPrevPos[INDEX_X]});
             compRaw = 0;
         }
-        if (cells[y][x] == Chars.O) {
-            if (cells[prevPos[0]][prevPos[1]] == Chars.X) {
-                compPrevPos[0] = -1;
-                compPrevPos[1] = -1;
-            }
+        if (cells[y][x] == compChar) {
+            if (cells[prevPos[INDEX_Y]][prevPos[INDEX_X]] == userChar) Arrays.fill(compPrevPos, ILLEGAL_ARRAY_ARGUMENT);
             compRaw++;
-            if (userPrevPos[0] >= 0 && userPrevPos[1] >= 0)
-                userMoves.put(userRaw, new int[]{userPrevPos[0], userPrevPos[1]});
+            if (userPrevPos[INDEX_Y] >= 0 && userPrevPos[INDEX_X] >= 0)
+                userMoves.put(userRaw, new int[]{userPrevPos[INDEX_Y], userPrevPos[INDEX_X]});
             userRaw = 0;
         }
         if (compRaw >= gameWinCount || userRaw >= gameWinCount) finalMessage();
-        prevPos[0] = y;
-        prevPos[1] = x;
+        prevPos[INDEX_Y] = y;
+        prevPos[INDEX_X] = x;
     }
 
     private static void endOfBounds() {
-        if (userPrevPos[0] >= 0 && userPrevPos[1] >= 0 && userRaw > 0)
-            userMoves.put(userRaw, new int[]{userPrevPos[0], userPrevPos[1]});
-        if (compPrevPos[0] >= 0 && compPrevPos[1] >= 0 && compRaw > 0)
-            compMoves.put(compRaw, new int[]{compPrevPos[0], compPrevPos[1]});
+        if (userPrevPos[INDEX_Y] >= 0 && userPrevPos[INDEX_X] >= 0 && userRaw > 0)
+            userMoves.put(userRaw, new int[]{userPrevPos[INDEX_Y], userPrevPos[INDEX_X]});
+        if (compPrevPos[INDEX_Y] >= 0 && compPrevPos[INDEX_X] >= 0 && compRaw > 0)
+            compMoves.put(compRaw, new int[]{compPrevPos[INDEX_Y], compPrevPos[INDEX_X]});
     }
 
     private static void elementsToStartValues(int y, int x) {
         userRaw = 0;
         compRaw = 0;
-        userPrevPos[0] = -1;
-        userPrevPos[1] = -1;
-        compPrevPos[0] = -1;
-        compPrevPos[1] = -1;
-        prevPos[0] = y;
-        prevPos[1] = x;
-    }
-
-    private static ArrayList<Integer> getRandomNumbers() {
-        ArrayList<Integer> numbersGenerated = new ArrayList<>();
-        int directionsToCheck = 4;
-        int randomNumber;
-        for (int i = 0; i < directionsToCheck; i++) {
-            randomNumber = RANDOM.nextInt(4) + 1;
-            if (!numbersGenerated.contains(randomNumber)) numbersGenerated.add(randomNumber);
-            else i--;
-        }
-        return numbersGenerated;
+        Arrays.fill(userPrevPos, ILLEGAL_ARRAY_ARGUMENT);
+        Arrays.fill(compPrevPos, ILLEGAL_ARRAY_ARGUMENT);
+        prevPos[INDEX_Y] = y;
+        prevPos[INDEX_X] = x;
     }
 
     private static void finalMessage() {
         showField();
-        if (currentChar == Chars.X) {
+        if (currentChar == userChar) {
             System.out.println("Поздравляю, Вы победили!!!");
             System.exit(0);
         }
-        if (currentChar == Chars.O) {
+        if (currentChar == compChar) {
             System.out.println("Победил компьютер");
             System.exit(0);
         }
@@ -356,7 +355,4 @@ public class Game {
         System.out.println("V");
         System.out.println("Y");
     }
-
-    private enum Chars {X, O, _;}
 }
-
