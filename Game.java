@@ -1,6 +1,7 @@
 import java.util.*;
 
 public class Game {
+
     private static final Scanner SCANNER = new Scanner(System.in);
     private static final Random RANDOM = new Random();
     private static final Map<Integer, int[]> compMoves = new HashMap<>();
@@ -43,7 +44,7 @@ public class Game {
         } while (gameWinCount < 3 || gameWinCount > maxCount);
         int difficulty;
         do {
-            System.out.print("Введите сложность: 1 - Легко(Рандом), 2 - Нормально(Комп закрывает ходы) 3 - Тяжело(Еще и сам пытается выиграть): ");
+            System.out.print("Введите сложность: 1 - Легко(Рандом), 2 - Нормально(Комп закрывает ходы), 3 - Тяжело(Еще и сам пытается выиграть): ");
             difficulty = getUserNumber();
             switch (difficulty) {
                 case 1:
@@ -69,8 +70,8 @@ public class Game {
     private static void gameStart() {
         for (int i = 0; i < Math.pow(fieldSize, 2); i++) {
             checkRaw();
-            showField();
             chooseWhomTurnNext();
+            showField();
             makeMove();
         }
         currentChar = Chars._;
@@ -83,16 +84,10 @@ public class Game {
     }
 
     private static void makeMove() {
-        switch (currentChar) {
-            case X:
-                userTurn();
-                break;
-            case O:
-                computerTurn();
-                break;
-            default:
-                break;
-        }
+        if (currentChar == Chars.X) userTurn();
+        else computerTurn();
+        compMoves.clear();
+        userMoves.clear();
         cells[y][x] = currentChar;
     }
 
@@ -177,8 +172,6 @@ public class Game {
         }
         y = compCurrentPos[0];
         x = compCurrentPos[1];
-        compMoves.clear();
-        userMoves.clear();
         System.out.println("\nА я пойду: X - " + (x + 1) + ", Y - " + (y + 1) + "\n");
     }
 
@@ -363,7 +356,6 @@ public class Game {
         System.out.println("V");
         System.out.println("Y");
     }
-
 
     private enum Chars {X, O, _;}
 }
