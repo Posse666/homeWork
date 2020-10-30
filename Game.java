@@ -1,5 +1,3 @@
-package hw3;
-
 import java.util.*;
 
 public class Game {
@@ -19,7 +17,6 @@ public class Game {
     private static final char emptyChar = '_';
     private static final int INDEX_X = 1;
     private static final int INDEX_Y = 0;
-    private static int numberOfCheckedRows = 0;
     private static int[] userCurrentPos = new int[2];
     private static int[] compCurrentPos = new int[2];
     private static int userRaw;
@@ -170,7 +167,7 @@ public class Game {
                     break;
                 }
             }
-            if (compMaxIndex - 1 != gameWinCount) {
+            if (compMaxIndex + 1 < gameWinCount) {
                 if (userMaxIndex > compMaxIndex) {
                     compCurrentPos[INDEX_Y] = userCurrentPos[INDEX_Y];
                     compCurrentPos[INDEX_X] = userCurrentPos[INDEX_X];
@@ -184,6 +181,7 @@ public class Game {
 
     static void checkRaw() {
         int maxWaysToCheck = 4;
+        int numberOfCheckedRows = 0;
         boolean check1completed = false;
         boolean check2completed = false;
         boolean check3completed = false;
@@ -210,7 +208,7 @@ public class Game {
                 check4completed = true;
                 numberOfCheckedRows++;
             }
-        } while (numberOfCheckedRows >= maxWaysToCheck);
+        } while (numberOfCheckedRows < maxWaysToCheck);
     }
 
     private static void checkDiagonal() {
@@ -275,19 +273,13 @@ public class Game {
                 compPrevPos[INDEX_Y] = y;
                 compPrevPos[INDEX_X] = x;
             }
-            if (userRaw > 0) {
-                if (RANDOM.nextInt(3) > 0 && userPrevPos[INDEX_Y] >= 0 && userPrevPos[INDEX_X] >= 0)
-                    userMoves.put(userRaw, new int[]{userPrevPos[INDEX_Y], userPrevPos[INDEX_X]});
-                else userMoves.put(userRaw, new int[]{userCurrentPos[INDEX_Y], userCurrentPos[INDEX_X]});
-            }
-            if (compRaw > 0) {
-                if (RANDOM.nextInt(3) > 0 && compPrevPos[INDEX_Y] >= 0 && compPrevPos[INDEX_X] >= 0)
-                    compMoves.put(compRaw, new int[]{compPrevPos[INDEX_Y], compPrevPos[INDEX_X]});
-                else compMoves.put(compRaw, new int[]{compCurrentPos[INDEX_Y], compCurrentPos[INDEX_X]});
-            }
+            checkMatchedRow(userRaw, userPrevPos, userMoves, userCurrentPos);
+            checkMatchedRow(compRaw, compPrevPos, compMoves, compCurrentPos);
             userRaw = 0;
             compRaw = 0;
         }
+//        checkCurrentChar(y, x, userChar, compChar, userPrevPos, compPrevPos, compMoves);
+//        checkCurrentChar(y, x, compChar, userChar, compPrevPos, userPrevPos, userMoves);
         if (cells[y][x] == userChar) {
             if (cells[prevPos[INDEX_Y]][prevPos[INDEX_X]] == compChar) Arrays.fill(userPrevPos, ILLEGAL_ARRAY_ARGUMENT);
             userRaw++;
@@ -305,6 +297,27 @@ public class Game {
         if (compRaw >= gameWinCount || userRaw >= gameWinCount) finalMessage();
         prevPos[INDEX_Y] = y;
         prevPos[INDEX_X] = x;
+    }
+
+//    private static void checkCurrentChar(int y, int x, char currentChar, char enemyChar, int[] previousPos, int[] enemyPrevPos, Map<Integer, int[]> moves) {
+//        if (cells[y][x] == currentChar) {
+//            if (cells[prevPos[INDEX_Y]][prevPos[INDEX_X]] == enemyChar)
+//                Arrays.fill(previousPos, ILLEGAL_ARRAY_ARGUMENT);
+//            if (currentChar == userChar) userRaw++;
+//            else compRaw++;
+//            if (enemyPrevPos[INDEX_Y] >= 0 && enemyPrevPos[INDEX_X] >= 0)
+//                moves.put(compRaw, new int[]{enemyPrevPos[INDEX_Y], enemyPrevPos[INDEX_X]});
+//            if (currentChar == userChar) compRaw = 0;
+//            else userRaw = 0;
+//        }
+//    }
+
+    private static void checkMatchedRow(int currentRaw, int[] prevPos, Map<Integer, int[]> moves, int[] currentPos) {
+        if (currentRaw > 0) {
+            if (RANDOM.nextInt(3) > 0 && prevPos[INDEX_Y] >= 0 && prevPos[INDEX_X] >= 0)
+                moves.put(currentRaw, new int[]{prevPos[INDEX_Y], prevPos[INDEX_X]});
+            else moves.put(currentRaw, new int[]{currentPos[INDEX_Y], currentPos[INDEX_X]});
+        }
     }
 
     private static void endOfBounds() {
