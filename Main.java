@@ -37,15 +37,21 @@ public class Main {
     }
 
     private static void generateTextFile(String inputFilename) {
-        int randomLength = random.nextInt(51) + 50;
+        int minimumLength = 50;
+        int maximumLength = 101;
+        int minimumChar = 48;
+        int maximumChar = 126;
+        int stringLowBound = 40;
+        int stringHighBound = 20;
+        int randomLength = random.nextInt(maximumLength - minimumLength) + minimumLength;
         try {
             fos = new FileOutputStream(folder + "/" + inputFilename);
             ps = new PrintStream(fos);
             searchString.setLength(0);
             for (int j = 0; j < randomLength; j++) {
-                int randomChar = random.nextInt(78) + 48;
+                int randomChar = random.nextInt(maximumChar-minimumChar) + minimumChar;
                 ps.print((char) randomChar);
-                if (j > randomLength - 40 && j < randomLength - 20) searchString.append((char) randomChar);
+                if (j > randomLength - stringLowBound && j < randomLength - stringHighBound) searchString.append((char) randomChar);
             }
             ps.close();
         } catch (IOException e) {
