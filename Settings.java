@@ -3,8 +3,8 @@ import java.awt.*;
 
 public class Settings extends JDialog {
 
-    private static final int WINDOW_WIDTH = 350;
-    private static final int WINDOW_HEIGHT = 270;
+    public static final int WINDOW_WIDTH = 350;
+    public static final int WINDOW_HEIGHT = 270;
     private static final int MIN_WIN_LENGTH = 3;
     private static final int MIN_FIELD_SIZE = 3;
     private static final int MAX_FIELD_SIZE = 10;
@@ -12,17 +12,17 @@ public class Settings extends JDialog {
     private static final String WIN_LENGTH_PREFIX = "Условие победы: ";
     private MainWindow mainWindow;
 
-    private JRadioButton humVSAI;
-    private JRadioButton humVSHum;
+    private JRadioButton easy;
+    private JRadioButton normal;
+    private JRadioButton hard;
     private JSlider slideWinCount;
     private JSlider slideFieldSize;
 
-
     Settings(MainWindow mainWindow) {
         setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
-        setLocation(mainWindow);
+        setWindowLocation(mainWindow);
         setTitle("Настройки новой игры");
-        setLayout(new GridLayout(12, 1));
+        setLayout(new GridLayout(13, 1));
 
         addGameModeSetup();
         add(splitter());
@@ -37,7 +37,7 @@ public class Settings extends JDialog {
         setVisible(false);
     }
 
-    public void setLocation(MainWindow mainWindow) {
+    public void setWindowLocation(MainWindow mainWindow) {
         this.mainWindow = mainWindow;
         Rectangle gameWindowBounds = mainWindow.getBounds();
         int posX = (int) gameWindowBounds.getCenterX() - WINDOW_WIDTH / 2;
@@ -47,13 +47,16 @@ public class Settings extends JDialog {
 
     private void addGameModeSetup() {
         add(new JLabel("Выберите режим игры:"));
-        humVSAI = new JRadioButton("Против компьютера", true);
-        humVSHum = new JRadioButton("Против человека");
+        easy = new JRadioButton("Легко", true);
+        normal = new JRadioButton("Нормально");
+        hard = new JRadioButton("Тяжело");
         ButtonGroup gameMode = new ButtonGroup();
-        gameMode.add(humVSAI);
-        gameMode.add(humVSHum);
-        add(humVSAI);
-        add(humVSHum);
+        gameMode.add(easy);
+        gameMode.add(normal);
+        gameMode.add(hard);
+        add(easy);
+        add(normal);
+        add(hard);
     }
 
     private void addFieldMapControl() {
@@ -64,7 +67,9 @@ public class Settings extends JDialog {
         slideFieldSize.addChangeListener(e -> {
             int currentValue = slideFieldSize.getValue();
             lblFieldSize.setText(FIELD_SIZE_PREFIX + currentValue);
-            slideWinCount.setMaximum(currentValue);
+            int winDifference = 2;
+            if (currentValue < MIN_FIELD_SIZE + winDifference) winDifference = 0;
+            slideWinCount.setMaximum(currentValue-winDifference);
         });
 
         slideWinCount = new JSlider(MIN_WIN_LENGTH, MIN_FIELD_SIZE, MIN_FIELD_SIZE);
@@ -82,10 +87,12 @@ public class Settings extends JDialog {
     private void btnPlayGameClick() {
         int gameMode;
 
-        if (humVSAI.isSelected()) {
-            gameMode = GameMap.MODE_HVA;
-        } else if (humVSHum.isSelected()) {
-            gameMode = GameMap.MODE_HVH;
+        if (easy.isSelected()) {
+            gameMode = GameMap.MODE_EASY;
+        } else if (normal.isSelected()) {
+            gameMode = GameMap.MODE_NORMAL;
+        } else if (hard.isSelected()) {
+            gameMode = GameMap.MODE_HARD;
         } else {
             throw new RuntimeException("Unexpected game mode!");
         }

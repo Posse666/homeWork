@@ -8,13 +8,12 @@ public class MainWindow extends JFrame {
     private final Settings settingsWindow = new Settings(this);
     private JPanel gamePanel = new JPanel();
 
-
     MainWindow() {
         draw();
 
         JButton gameStartButton = new JButton("ИГРАТЬ!");
         gameStartButton.addActionListener(e -> {
-            settingsWindow.setLocation(this);
+            settingsWindow.setWindowLocation(this);
             settingsWindow.setVisible(true);
         });
 
@@ -43,11 +42,12 @@ public class MainWindow extends JFrame {
     }
 
     public void startNewGame(int gameMode, int fieldSize, int gameWinCount) {
-        GameMap gameMap = new GameMap(fieldSize);
+        GameMap gameMap = new GameMap(fieldSize , this);
         remove(gamePanel);
         gamePanel = gameMap.getGamePanel();
         add(gamePanel);
         revalidate();
-        gameMap.startNewGame(gameMode, gameWinCount);
+        WinScreen winScreen = new WinScreen(this,settingsWindow);
+        new GameStart(fieldSize, winScreen, gameMode, gameWinCount, gameMap);
     }
 }
