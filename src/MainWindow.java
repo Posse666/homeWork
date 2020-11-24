@@ -8,13 +8,13 @@ public class MainWindow extends JFrame {
     private final Settings settingsWindow = new Settings(this);
     private JPanel gamePanel = new JPanel();
 
-
     MainWindow() {
         draw();
+        getContentPane().setBackground(Color.GRAY);
 
         JButton gameStartButton = new JButton("ИГРАТЬ!");
         gameStartButton.addActionListener(e -> {
-            settingsWindow.setLocation(this);
+            settingsWindow.setWindowLocation(this);
             settingsWindow.setVisible(true);
         });
 
@@ -22,7 +22,6 @@ public class MainWindow extends JFrame {
         gameExitButton.addActionListener(e -> System.exit(0));
 
         drawBottomPanel(gameStartButton, gameExitButton);
-        add(gamePanel);
         setResizable(false);
         setVisible(true);
     }
@@ -43,11 +42,16 @@ public class MainWindow extends JFrame {
     }
 
     public void startNewGame(int gameMode, int fieldSize, int gameWinCount) {
-        GameMap gameMap = new GameMap(fieldSize);
+        GameMap gameMap = new GameMap(fieldSize, this);
         remove(gamePanel);
         gamePanel = gameMap.getGamePanel();
         add(gamePanel);
         revalidate();
-        gameMap.startNewGame(gameMode, gameWinCount);
+        WinScreen winScreen = new WinScreen(this, settingsWindow);
+        new GameStart(fieldSize, winScreen, gameMode, gameWinCount, gameMap);
+    }
+
+    public void hideGamePanel() {
+        gamePanel.setVisible(false);
     }
 }
