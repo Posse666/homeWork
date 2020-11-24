@@ -1,8 +1,6 @@
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 
 public class Settings extends JDialog {
 
@@ -28,13 +26,7 @@ public class Settings extends JDialog {
         setWindowLocation(mainWindow);
         setTitle("Настройки новой игры");
 
-        setDefaultCloseOperation(HIDE_ON_CLOSE);
-        addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentHidden(ComponentEvent e) {
-                dispose();
-            }
-        });
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
         createSettingsPanel();
         add(settingsPanel);
@@ -107,11 +99,11 @@ public class Settings extends JDialog {
         int gameMode;
 
         if (easy.isSelected()) {
-            gameMode = GameMap.MODE_EASY;
+            gameMode = Computer.MODE_EASY;
         } else if (normal.isSelected()) {
-            gameMode = GameMap.MODE_NORMAL;
+            gameMode = Computer.MODE_NORMAL;
         } else if (hard.isSelected()) {
-            gameMode = GameMap.MODE_HARD;
+            gameMode = Computer.MODE_HARD;
         } else {
             throw new RuntimeException("Unexpected game mode!");
         }

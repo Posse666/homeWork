@@ -7,13 +7,15 @@ public class Computer {
     private static final int INDEX_X = GameStart.INDEX_X;
     private static final int INDEX_Y = GameStart.INDEX_Y;
 
-    private boolean easy;
-    private boolean normal;
-    private boolean hard;
+    public static final int MODE_EASY = 1;
+    public static final int MODE_NORMAL = 2;
+    public static final int MODE_HARD = 3;
 
+    private final int gameMode;
     private final int fieldSize;
     private final int gameWinCount;
     private final char[][] cells;
+    private int userMaxIndex;
 
     private final GameMap gameMap;
     private final RowChecker rowChecker;
@@ -22,49 +24,54 @@ public class Computer {
     private int[] userBestPosition = new int[2];
 
     Computer(int gameMode, int fieldSize, int gameWinCount, GameMap gameMap, RowChecker rowChecker, char[][] cells) {
-        switch (gameMode) {
-            case 1:
-                easy = true;
-                break;
-            case 3:
-                hard = true;
-            case 2:
-                normal = true;
-                break;
-            default:
-                throw new RuntimeException("Unexpected comp difficulty. Game mode: " + gameMode);
-        }
         this.fieldSize = fieldSize;
         this.gameWinCount = gameWinCount;
         this.gameMap = gameMap;
         this.rowChecker = rowChecker;
         this.cells = cells;
+        this.gameMode = gameMode;
     }
 
     public int[] makeMove() {
-        int userMaxIndex = 0;
-
-        if (easy) {
-            do {
-                compPositionToMove[INDEX_Y] = RANDOM.nextInt(fieldSize);
-                compPositionToMove[INDEX_X] = RANDOM.nextInt(fieldSize);
-            } while (isUsedCell(compPositionToMove[INDEX_Y], compPositionToMove[INDEX_X]));
-        }
-        if (normal) {
-            userMaxIndex = getNormalAndHardMoves(rowChecker.getUserMoves(), true);
-        }
-        if (hard) {
-            int compMaxIndex = getNormalAndHardMoves(rowChecker.getCompMoves(), false);
-            if (compMaxIndex < gameWinCount) {
-                if (userMaxIndex >= compMaxIndex) {
-                    compPositionToMove[INDEX_Y] = userBestPosition[INDEX_Y];
-                    compPositionToMove[INDEX_X] = userBestPosition[INDEX_X];
-                }
-            }
-            putCenterAt3x3();
+        userMaxIndex = 0;
+        switch (gameMode) {
+            case MODE_EASY:
+                makeEasyMove();
+                break;
+            case MODE_NORMAL:
+                makeNormalMove();
+                break;
+            case MODE_HARD:
+                makeNormalMove();
+                makeHardMove();
+                break;
+            default:
+                throw new RuntimeException("Unexpected comp difficulty. Game mode: " + gameMode);
         }
         gameMap.buttonLowered(compPositionToMove[INDEX_Y], compPositionToMove[INDEX_X], true);
-        return new int[]{compPositionToMove[INDEX_Y], compPositionToMove[INDEX_X]};
+        return compPositionToMove;
+    }
+
+    private void makeEasyMove() {
+        do {
+            compPositionToMove[INDEX_Y] = RANDOM.nextInt(fieldSize);
+            compPositionToMove[INDEX_X] = RANDOM.nextInt(fieldSize);
+        } while (isUsedCell(compPositionToMove[INDEX_Y], compPositionToMove[INDEX_X]));
+    }
+
+    private void makeNormalMove() {
+        userMaxIndex = getNormalAndHardMoves(rowChecker.getUserMoves(), false);
+    }
+
+    private void makeHardMove() {
+        int compMaxIndex = getNormalAndHardMoves(rowChecker.getCompMoves(), true);
+        if (compMaxIndex < gameWinCount) {
+            if (userMaxIndex >= compMaxIndex) {
+                compPositionToMove[INDEX_Y] = userBestPosition[INDEX_Y];
+                compPositionToMove[INDEX_X] = userBestPosition[INDEX_X];
+            }
+        }
+        putCenterAt3x3();
     }
 
     private void putCenterAt3x3() {
@@ -78,11 +85,11 @@ public class Computer {
         return cells[y][x] != GameStart.EMPTY_CHAR;
     }
 
-    private int getNormalAndHardMoves(Map<Integer, int[]> moves, boolean user) {
+    private int getNormalAndHardMoves(Map<Integer, int[]> moves, boolean hardMode) {
         for (int i = fieldSize * 2; i >= 0; i--) {
             if (moves.containsKey(i)) {
-                if (user) userBestPosition = moves.get(i);
-                else compPositionToMove = moves.get(i);
+                if (hardMode) compPositionToMove = moves.get(i);
+                else userBestPosition = moves.get(i);
                 return i;
             }
         }

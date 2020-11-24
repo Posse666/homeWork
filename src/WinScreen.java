@@ -20,15 +20,15 @@ public class WinScreen extends JDialog {
         setTitle("ИТОГ");
         add(lblFinalMessage);
 
-        JButton btnPlayAgain = new JButton("Начать заново!");
-        btnPlayAgain.addActionListener(e -> {
+        JButton buttonPlayAgain = new JButton("Начать заново!");
+        buttonPlayAgain.addActionListener(e -> {
             mainWindow.hideGamePanel();
             dispose();
             showSettings();
         });
 
-        JButton gameExitButton = new JButton("ВЫХОД");
-        gameExitButton.addActionListener(e -> System.exit(0));
+        JButton buttonExitGame = new JButton("ВЫХОД");
+        buttonExitGame.addActionListener(e -> System.exit(0));
 
         setDefaultCloseOperation(HIDE_ON_CLOSE);
         addComponentListener(new ComponentAdapter() {
@@ -39,7 +39,7 @@ public class WinScreen extends JDialog {
             }
         });
 
-        drawBottomPanel(btnPlayAgain, gameExitButton);
+        drawBottomPanel(buttonPlayAgain, buttonExitGame);
         setModal(true);
         setResizable(false);
         setVisible(false);
@@ -53,7 +53,6 @@ public class WinScreen extends JDialog {
     }
 
     private void showSettings() {
-        dispose();
         settingsWindow.setWindowLocation(mainWindow);
         settingsWindow.setVisible(true);
     }

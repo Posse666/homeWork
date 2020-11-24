@@ -14,34 +14,34 @@ public class RowChecker {
     private static final char EMPTY_CHAR = GameStart.EMPTY_CHAR;
     private static final int INDEX_X = GameStart.INDEX_X;
     private static final int INDEX_Y = GameStart.INDEX_Y;
+    private final WinScreen winScreen;
     private final int WIN_SITUATION_INDEX;
+    private final char[][] cells;
     private final int[] userLastAvailablePos = new int[2];
     private final int[] compLastAvailablePos = new int[2];
-    private int userRow;
-    private boolean draw;
-    private int maxPossibleUserRow;
-    private int lastAvailableUserRow;
-    private int compRow;
-    private int maxPossibleCompRow;
-    private int lastAvailableCompRaw;
     private final int fieldSize;
-    private int emptyCells;
     private final int gameWinCount;
+    private char currentChar;
+    private boolean draw;
+    private int userRow;
+    private int compRow;
+    private int maxPossibleUserRow;
+    private int maxPossibleCompRow;
+    private int lastAvailableUserRow;
+    private int lastAvailableCompRaw;
+    private int emptyCells;
     private int userChars;
     private int compChars;
     private boolean lastMove;
     private boolean possibleFullRow;
     private boolean nonEmptyCharFound;
-    private final char[][] cells;
-    private char currentChar;
-    private final WinScreen winScreen;
 
     RowChecker(WinScreen winScreen, int fieldSize, char[][] cells, int gameWinCount) {
         this.winScreen = winScreen;
         this.fieldSize = fieldSize;
         this.cells = cells;
         this.gameWinCount = gameWinCount;
-        this.WIN_SITUATION_INDEX = fieldSize * 2;
+        WIN_SITUATION_INDEX = fieldSize * 2;
     }
 
     public void checkRaw(char currentChar) throws InterruptedException {
