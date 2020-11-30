@@ -1,3 +1,7 @@
+package visible;
+
+import controller.GameController;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
@@ -16,10 +20,9 @@ public class GameMap extends JPanel {
 
     private static final Random RANDOM = new Random();
     private static final int BORDER_SIZE = 36;
-    private final File jarFile = new File(getClass().getProtectionDomain().getCodeSource().getLocation().getPath());
     private static final String USER_ICONS_PATH = "iconX";
     private static final String COMP_ICONS_PATH = "iconO";
-    private final MainWindow mainWindow;
+    private final GameController gameController;
     private final int fieldSize;
     private final ArrayList<ImageIcon> scaledUserIcons = new ArrayList<>();
     private final ArrayList<ImageIcon> scaledCompIcons = new ArrayList<>();
@@ -31,9 +34,9 @@ public class GameMap extends JPanel {
     private JButton lastButtonPressed;
     private boolean resourceError = false;
 
-    GameMap(int fieldSize, MainWindow mainWindow) {
+    public GameMap(int fieldSize, GameController gameController) {
+        this.gameController = gameController;
         this.fieldSize = fieldSize;
-        this.mainWindow =mainWindow;
         drawGamePanel();
         initScaledIcons(scaledUserIcons, USER_ICONS_PATH);
         initScaledIcons(scaledCompIcons, COMP_ICONS_PATH);
@@ -60,8 +63,6 @@ public class GameMap extends JPanel {
                 gamePanel.add(makeButton(gameButton, y, x));
             }
         }
-        mainWindow.add(gamePanel, BorderLayout.CENTER);
-        gamePanel.setVisible(true);
 
         lastButtonPressed = gameButtons[0][0];
     }
@@ -76,21 +77,17 @@ public class GameMap extends JPanel {
         return buttonPanels[y][x];
     }
 
-    public void jButtonPressed(int y, int x) {
+    private void jButtonPressed(int y, int x) {
         buttonLowered(y, x, false);
-        try {
-            GameStart.buttonPressed(y, x);
-        } catch (InterruptedException e) {
-            System.out.println("Begin of new GAME");
-        }
+        gameController.gameFieldButtonPressed(y, x);
     }
 
     public void buttonLowered(int y, int x, boolean computerMove) {
         buttonPanels[y][x].setBorder(buttonPressedBorder);
         if (resourceError) {
-            String buttonText = String.valueOf(GameStart.USER_CHAR);
-            if (computerMove) buttonText = String.valueOf(GameStart.COMP_CHAR);
-            gameButtons[y][x].setFont(new Font("Serif", Font.PLAIN, MainWindow.SCREEN_HEIGHT / fieldSize / 10));
+            String buttonText = String.valueOf(gameController.getUserChar());
+            if (computerMove) buttonText = String.valueOf(gameController.getComputerChar());
+            gameButtons[y][x].setFont(new Font("Serif", Font.PLAIN, gameController.getScreenHeight() / fieldSize / 10));
             gameButtons[y][x].setText(buttonText);
         } else {
             ImageIcon icon = scaledUserIcons.get(getRandomIconNumber(scaledUserIcons.size()));
@@ -109,7 +106,7 @@ public class GameMap extends JPanel {
     }
 
     private void initScaledIcons(ArrayList<ImageIcon> scaledIcons, String iconsPath) {
-
+        File jarFile = new File(getClass().getProtectionDomain().getCodeSource().getLocation().getPath());
         if (jarFile.isFile()) {  // Run with JAR file
             JarFile jar;
             try {
@@ -145,13 +142,13 @@ public class GameMap extends JPanel {
 
     private void scaleIcons(ArrayList<ImageIcon> scaledIcons, ImageIcon icon) {
         Image img = icon.getImage();
-        Image newImg = img.getScaledInstance(MainWindow.SCREEN_HEIGHT / fieldSize / 4, MainWindow.SCREEN_HEIGHT / fieldSize / 4, Image.SCALE_SMOOTH);
+        Image newImg = img.getScaledInstance(gameController.getScreenHeight() / fieldSize / 4, gameController.getScreenHeight() / fieldSize / 4, Image.SCALE_SMOOTH);
         scaledIcons.add(new ImageIcon(newImg));
     }
 
-    private void showErrorWindow(String path){
+    private void showErrorWindow(String path) {
         String errorString = "<html><div WIDTH=WINDOW_WIDTH><center>Внимание! Не найдено ресурсов по пути: " + path + ". Будут использованы обычные символы!</center></div></html>";
-        new ErrorWindow(mainWindow, errorString);
+        gameController.showError(errorString);
         resourceError = true;
     }
 

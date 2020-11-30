@@ -1,22 +1,22 @@
+package visible;
+
+import controller.GameController;
+
 import javax.swing.*;
 import java.awt.*;
 
 public class MainWindow extends JFrame {
 
-    public static final int SCREEN_WIDTH = Toolkit.getDefaultToolkit().getScreenSize().width;
-    public static final int SCREEN_HEIGHT = Toolkit.getDefaultToolkit().getScreenSize().height;
-    private final Settings settingsWindow = new Settings(this);
+    private static final int SCREEN_WIDTH = Toolkit.getDefaultToolkit().getScreenSize().width;
+    private static final int SCREEN_HEIGHT = Toolkit.getDefaultToolkit().getScreenSize().height;
     private JPanel gamePanel = new JPanel();
 
-    MainWindow() {
+    public MainWindow(GameController gameController) {
         draw();
         getContentPane().setBackground(Color.GRAY);
 
         JButton gameStartButton = new JButton("ИГРАТЬ!");
-        gameStartButton.addActionListener(e -> {
-            settingsWindow.setWindowLocation(this);
-            settingsWindow.setVisible(true);
-        });
+        gameStartButton.addActionListener(e -> gameController.mainWindowPlayButtonPressed());
 
         JButton gameExitButton = new JButton("ВЫХОД");
         gameExitButton.addActionListener(e -> System.exit(0));
@@ -41,17 +41,19 @@ public class MainWindow extends JFrame {
         add(panelBottom, BorderLayout.SOUTH);
     }
 
-    public void startNewGame(int gameMode, int fieldSize, int gameWinCount) {
-        GameMap gameMap = new GameMap(fieldSize, this);
-        remove(gamePanel);
-        gamePanel = gameMap.getGamePanel();
-        add(gamePanel);
+    public void addGamePanel(JPanel gamePanel){
+        remove(this.gamePanel);
+        this.gamePanel = gamePanel;
+        add(gamePanel, BorderLayout.CENTER);
+        gamePanel.setVisible(true);
         revalidate();
-        WinScreen winScreen = new WinScreen(this, settingsWindow);
-        new GameStart(fieldSize, winScreen, gameMode, gameWinCount, gameMap);
     }
 
-    public void hideGamePanel() {
+    public int getScreenHeight() {
+        return SCREEN_HEIGHT;
+    }
+
+    public void hideMap (){
         gamePanel.setVisible(false);
     }
 }

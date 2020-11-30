@@ -1,3 +1,7 @@
+package model;
+
+import controller.GameController;
+
 import java.util.*;
 
 public class RowChecker {
@@ -9,16 +13,16 @@ public class RowChecker {
     private final int[] compPrevPos = new int[2];
     private final int[] prevPos = new int[2];
     private static final int ILLEGAL_ARRAY_ARGUMENT = -1;
-    private static final char USER_CHAR = GameStart.USER_CHAR;
-    private static final char COMP_CHAR = GameStart.COMP_CHAR;
-    private static final char EMPTY_CHAR = GameStart.EMPTY_CHAR;
-    private static final int INDEX_X = GameStart.INDEX_X;
-    private static final int INDEX_Y = GameStart.INDEX_Y;
-    private final WinScreen winScreen;
+    private static final char USER_CHAR = GameConstants.USER_CHAR;
+    private static final char COMP_CHAR = GameConstants.COMP_CHAR;
+    private static final char EMPTY_CHAR = GameConstants.EMPTY_CHAR;
+    private static final int INDEX_X = GameConstants.INDEX_X;
+    private static final int INDEX_Y = GameConstants.INDEX_Y;
     private final int WIN_SITUATION_INDEX;
     private final char[][] cells;
     private final int[] userLastAvailablePos = new int[2];
     private final int[] compLastAvailablePos = new int[2];
+    private final GameController gameController;
     private final int fieldSize;
     private final int gameWinCount;
     private char currentChar;
@@ -36,8 +40,8 @@ public class RowChecker {
     private boolean possibleFullRow;
     private boolean nonEmptyCharFound;
 
-    RowChecker(WinScreen winScreen, int fieldSize, char[][] cells, int gameWinCount) {
-        this.winScreen = winScreen;
+    public RowChecker(GameController gameController, int fieldSize, char[][] cells, int gameWinCount) {
+        this.gameController = gameController;
         this.fieldSize = fieldSize;
         this.cells = cells;
         this.gameWinCount = gameWinCount;
@@ -71,7 +75,7 @@ public class RowChecker {
             rowChecker(diagonal, revDiagonal, horizontal, vertical);
         }
         if (draw) {
-            winScreen.showScreen(EMPTY_CHAR);
+            gameController.showWinScreen(EMPTY_CHAR);
             throw (new InterruptedException());
         }
     }
@@ -106,7 +110,7 @@ public class RowChecker {
         checkCurrentChar(y, x, USER_CHAR, COMP_CHAR, userPrevPos, compPrevPos, compMoves);
         checkCurrentChar(y, x, COMP_CHAR, USER_CHAR, compPrevPos, userPrevPos, userMoves);
         if (compRow >= gameWinCount || userRow >= gameWinCount) {
-            winScreen.showScreen(currentChar);
+            gameController.showWinScreen(currentChar);
             throw (new InterruptedException());
         }
         prevPos[INDEX_Y] = y;

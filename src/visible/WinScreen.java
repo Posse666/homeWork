@@ -1,3 +1,7 @@
+package visible;
+
+import controller.GameController;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
@@ -5,26 +9,27 @@ import java.awt.event.ComponentEvent;
 
 public class WinScreen extends JDialog {
 
-    private static final int WINDOW_WIDTH = Settings.WINDOW_WIDTH;
-    private static final int WINDOW_HEIGHT = Settings.WINDOW_HEIGHT;
-    private final MainWindow mainWindow;
-    private final Settings settingsWindow;
+    private final int WINDOW_WIDTH;
+    private final int WINDOW_HEIGHT;
+    private final GameController gameController;
     private JLabel lblFinalMessage = new JLabel("");
 
-    WinScreen(MainWindow mainWindow, Settings settingsWindow) {
+    public WinScreen(GameController gameController) {
 
-        this.mainWindow = mainWindow;
-        this.settingsWindow = settingsWindow;
+        this.gameController = gameController;
+        WINDOW_WIDTH = gameController.getWidthForWinScreen();
+        WINDOW_HEIGHT = gameController.getHeightForWinScreen();
+
         setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
-        setWindowLocation(mainWindow);
+        setWindowLocation();
         setTitle("ИТОГ");
         add(lblFinalMessage);
 
         JButton buttonPlayAgain = new JButton("Начать заново!");
         buttonPlayAgain.addActionListener(e -> {
-            mainWindow.hideGamePanel();
+            gameController.hideGamePanel();
             dispose();
-            showSettings();
+            gameController.mainWindowPlayButtonPressed();
         });
 
         JButton buttonExitGame = new JButton("ВЫХОД");
@@ -34,7 +39,7 @@ public class WinScreen extends JDialog {
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentHidden(ComponentEvent e) {
-                mainWindow.hideGamePanel();
+                gameController.hideGamePanel();
                 dispose();
             }
         });
@@ -45,42 +50,18 @@ public class WinScreen extends JDialog {
         setVisible(false);
     }
 
-    private void setWindowLocation(MainWindow mainWindow) {
-        Rectangle mainWindowBounds = mainWindow.getBounds();
+    private void setWindowLocation() {
+        Rectangle mainWindowBounds = gameController.getMainWindowBounds();
         int posX = (int) mainWindowBounds.getCenterX() - WINDOW_WIDTH / 2;
         int posY = (int) mainWindowBounds.getCenterY() - WINDOW_HEIGHT / 2;
         setLocation(posX, posY);
     }
 
-    private void showSettings() {
-        settingsWindow.setWindowLocation(mainWindow);
-        settingsWindow.setVisible(true);
-    }
-
-    public void showScreen(char currentChar) {
-        remove(lblFinalMessage);
-        String finalMessage = getWinnerString(currentChar);
-        setWindowLocation(mainWindow);
-        lblFinalMessage = new JLabel(finalMessage);
-        lblFinalMessage.setFont(new Font("Serif", Font.PLAIN, MainWindow.SCREEN_HEIGHT / 30));
-        lblFinalMessage.setHorizontalAlignment(SwingConstants.CENTER);
-        add(lblFinalMessage);
-        revalidate();
-        setVisible(true);
-    }
-
     private String getWinnerString(char currentChar) {
         String winnerName;
-        switch (currentChar) {
-            case GameStart.USER_CHAR:
-                winnerName = " Игрок";
-                break;
-            case GameStart.COMP_CHAR:
-                winnerName = " Компьютер";
-                break;
-            default:
-                winnerName = "а Дружба";
-        }
+        if (currentChar == gameController.getUserChar()) winnerName = " Игрок";
+        else if (currentChar == gameController.getComputerChar()) winnerName = " Компьютер";
+        else winnerName = "а Дружба";
         return "Победил" + winnerName;
     }
 
@@ -90,5 +71,17 @@ public class WinScreen extends JDialog {
         panelBottom.add(btnPlayAgain);
         panelBottom.add(btnExitGame);
         add(panelBottom, BorderLayout.SOUTH);
+    }
+
+    public void showScreen(char currentChar) {
+        remove(lblFinalMessage);
+        String finalMessage = getWinnerString(currentChar);
+        setWindowLocation();
+        lblFinalMessage = new JLabel(finalMessage);
+        lblFinalMessage.setFont(new Font("Serif", Font.PLAIN, gameController.getScreenHeight() / 30));
+        lblFinalMessage.setHorizontalAlignment(SwingConstants.CENTER);
+        add(lblFinalMessage);
+        revalidate();
+        setVisible(true);
     }
 }
