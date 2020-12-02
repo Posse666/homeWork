@@ -15,9 +15,9 @@ public class ErrorWindow extends JDialog {
         errorMessage.setFont(new Font("Serif", Font.PLAIN, gameController.getScreenHeight() / 60));
 
         setSize(windowWidth, windowHeight);
-        Rectangle mainWindowBounds = gameController.getMainWindowBounds();
-        int posX = (int) mainWindowBounds.getCenterX() - windowWidth / 2;
-        int posY = (int) mainWindowBounds.getCenterY() - windowHeight / 2;
+        Rectangle bounds = gameController.getBoundsForExternalWindow();
+        int posX = (int) bounds.getCenterX() - windowWidth / 2;
+        int posY = (int) bounds.getCenterY() - windowHeight / 2;
         setLocation(posX, posY);
         setTitle("Внимание!");
         add(errorMessage);

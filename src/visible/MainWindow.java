@@ -9,7 +9,6 @@ public class MainWindow extends JFrame {
 
     private static final int SCREEN_WIDTH = Toolkit.getDefaultToolkit().getScreenSize().width;
     private static final int SCREEN_HEIGHT = Toolkit.getDefaultToolkit().getScreenSize().height;
-    private JPanel gamePanel = new JPanel();
 
     public MainWindow(GameController gameController) {
         draw();
@@ -41,19 +40,7 @@ public class MainWindow extends JFrame {
         add(panelBottom, BorderLayout.SOUTH);
     }
 
-    public void addGamePanel(JPanel gamePanel){
-        remove(this.gamePanel);
-        this.gamePanel = gamePanel;
-        add(gamePanel, BorderLayout.CENTER);
-        gamePanel.setVisible(true);
-        revalidate();
-    }
-
     public int getScreenHeight() {
         return SCREEN_HEIGHT;
-    }
-
-    public void hideMap (){
-        gamePanel.setVisible(false);
     }
 }

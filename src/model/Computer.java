@@ -2,42 +2,53 @@ package model;
 
 import controller.GameController;
 
+import java.util.Map;
 import java.util.Random;
 
 public class Computer {
 
-    public static final int MODE_VERY_EASY = 0;
-    public static final int MODE_EASY = 1;
-    public static final int MODE_NORMAL = 2;
-    public static final int MODE_HARD = 3;
+    private static final int MODE_VERY_EASY = 0;
+    private static final int MODE_EASY = 1;
+    private static final int MODE_NORMAL = 2;
+    private static final int MODE_HARD = 3;
 
     private static final Random RANDOM = new Random();
-    private static final int INDEX_X = GameConstants.INDEX_X;
-    private static final int INDEX_Y = GameConstants.INDEX_Y;
+    private final int INDEX_X;
+    private final int INDEX_Y;
 
-    private final int gameMode;
-    private final int fieldSize;
-    private final int gameWinCount;
-    private final char[][] cells;
+    private int gameMode;
+    private int fieldSize;
+    private int gameWinCount;
+    private char[][] cells;
     private int userMaxIndex;
     private int compMaxIndex;
+    private Map<Integer, int[]> compMoves;
+    private Map<Integer, int[]> userMoves;
 
     private final GameController gameController;
 
     private int[] compPositionToMove = new int[2];
     private int[] userBestPosition = new int[2];
 
-    public Computer(int gameMode, int fieldSize, int gameWinCount, GameController gameController, char[][] cells) {
+    public Computer(GameController gameController) {
+        this.gameController = gameController;
+        INDEX_X = gameController.getIndexX();
+        INDEX_Y = gameController.getIndexY();
+    }
+
+    public void init(int gameMode, int fieldSize, int gameWinCount, char[][] cells) {
         this.fieldSize = fieldSize;
         this.gameWinCount = gameWinCount;
-        this.gameController = gameController;
         this.cells = cells;
         this.gameMode = gameMode;
     }
 
-    public int[] makeMove() {
+    public int[] makeMove(Map<Integer, int[]> compMoves, Map<Integer, int[]> userMoves) {
+        this.compMoves = compMoves;
+        this.userMoves = userMoves;
         userMaxIndex = 0;
         compMaxIndex = 0;
+
         switch (gameMode) {
             case MODE_VERY_EASY:
                 makeVeryEasyMove();
@@ -55,7 +66,6 @@ public class Computer {
                 throw new RuntimeException("Unexpected comp difficulty. Game mode: " + gameMode);
         }
 
-        gameController.setComputerMove(compPositionToMove[INDEX_Y], compPositionToMove[INDEX_X]);
         return compPositionToMove;
     }
 
@@ -92,26 +102,43 @@ public class Computer {
     }
 
     private void putCenterAt3x3() {
-        if (fieldSize == 3 && cells[1][1] == GameConstants.EMPTY_CHAR) {
+        if (fieldSize == 3 && cells[1][1] == gameController.getEmptyChar()) {
             compPositionToMove[INDEX_Y] = 1;
             compPositionToMove[INDEX_X] = 1;
         }
     }
 
     private boolean isUsedCell(int y, int x) {
-        return cells[y][x] != GameConstants.EMPTY_CHAR;
+        return cells[y][x] != gameController.getEmptyChar();
     }
 
     private void getUserAndCompBestMoves() {
         for (int i = fieldSize * 2; i >= 0; i--) {
-            if (compMaxIndex == 0 && gameController.getCompMoves().containsKey(i)) {
-                compPositionToMove = gameController.getCompMoves().get(i);
+            if (compMaxIndex == 0 && compMoves.containsKey(i)) {
+                compPositionToMove = compMoves.get(i);
                 compMaxIndex = i;
             }
-            if (userMaxIndex == 0 && gameController.getUserMoves().containsKey(i)) {
-                userBestPosition = gameController.getUserMoves().get(i);
+            if (userMaxIndex == 0 && userMoves.containsKey(i)) {
+                userBestPosition = userMoves.get(i);
                 userMaxIndex = i;
             }
+            if (compMaxIndex != 0 && userMaxIndex != 0) return;
         }
+    }
+
+    public static int getModeVeryEasy() {
+        return MODE_VERY_EASY;
+    }
+
+    public static int getModeEasy() {
+        return MODE_EASY;
+    }
+
+    public static int getModeNormal() {
+        return MODE_NORMAL;
+    }
+
+    public static int getModeHard() {
+        return MODE_HARD;
     }
 }

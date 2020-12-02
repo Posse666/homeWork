@@ -12,7 +12,7 @@ public class WinScreen extends JDialog {
     private final int WINDOW_WIDTH;
     private final int WINDOW_HEIGHT;
     private final GameController gameController;
-    private JLabel lblFinalMessage = new JLabel("");
+    private JLabel labelFinalMessage = new JLabel("");
 
     public WinScreen(GameController gameController) {
 
@@ -23,14 +23,10 @@ public class WinScreen extends JDialog {
         setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
         setWindowLocation();
         setTitle("ИТОГ");
-        add(lblFinalMessage);
+        add(labelFinalMessage);
 
         JButton buttonPlayAgain = new JButton("Начать заново!");
-        buttonPlayAgain.addActionListener(e -> {
-            gameController.hideGamePanel();
-            dispose();
-            gameController.mainWindowPlayButtonPressed();
-        });
+        buttonPlayAgain.addActionListener(e -> gameController.winScreenPlayAgainButtonPressed());
 
         JButton buttonExitGame = new JButton("ВЫХОД");
         buttonExitGame.addActionListener(e -> System.exit(0));
@@ -39,8 +35,7 @@ public class WinScreen extends JDialog {
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentHidden(ComponentEvent e) {
-                gameController.hideGamePanel();
-                dispose();
+                gameController.winScreenClosed();
             }
         });
 
@@ -51,17 +46,17 @@ public class WinScreen extends JDialog {
     }
 
     private void setWindowLocation() {
-        Rectangle mainWindowBounds = gameController.getMainWindowBounds();
-        int posX = (int) mainWindowBounds.getCenterX() - WINDOW_WIDTH / 2;
-        int posY = (int) mainWindowBounds.getCenterY() - WINDOW_HEIGHT / 2;
+        Rectangle bounds = gameController.getBoundsForExternalWindow();
+        int posX = (int) bounds.getCenterX() - WINDOW_WIDTH / 2;
+        int posY = (int) bounds.getCenterY() - WINDOW_HEIGHT / 2;
         setLocation(posX, posY);
     }
 
-    private String getWinnerString(char currentChar) {
-        String winnerName;
-        if (currentChar == gameController.getUserChar()) winnerName = " Игрок";
-        else if (currentChar == gameController.getComputerChar()) winnerName = " Компьютер";
-        else winnerName = "а Дружба";
+    private String getWinnerString(char currentChar, int gameMode) {
+        String winnerName = " Игрок";
+        if (currentChar == gameController.getEmptyChar()) winnerName = "а Дружба";
+        else if (currentChar == gameController.getSecondPlayerChar()) winnerName = (gameMode == gameController.getTwoPlayersGameMode()) ? winnerName + " №2" : " Компьютер";
+        else if (gameMode == gameController.getTwoPlayersGameMode()) winnerName += " №1";
         return "Победил" + winnerName;
     }
 
@@ -73,14 +68,14 @@ public class WinScreen extends JDialog {
         add(panelBottom, BorderLayout.SOUTH);
     }
 
-    public void showScreen(char currentChar) {
-        remove(lblFinalMessage);
-        String finalMessage = getWinnerString(currentChar);
+    public void showScreen(char currentChar, int gameMode) {
+        remove(labelFinalMessage);
+        String finalMessage = getWinnerString(currentChar, gameMode);
         setWindowLocation();
-        lblFinalMessage = new JLabel(finalMessage);
-        lblFinalMessage.setFont(new Font("Serif", Font.PLAIN, gameController.getScreenHeight() / 30));
-        lblFinalMessage.setHorizontalAlignment(SwingConstants.CENTER);
-        add(lblFinalMessage);
+        labelFinalMessage = new JLabel(finalMessage);
+        labelFinalMessage.setFont(new Font("Serif", Font.PLAIN, gameController.getScreenHeight() / 30));
+        labelFinalMessage.setHorizontalAlignment(SwingConstants.CENTER);
+        add(labelFinalMessage);
         revalidate();
         setVisible(true);
     }

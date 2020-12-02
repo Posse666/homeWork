@@ -1,92 +1,146 @@
 package controller;
 
-import model.Computer;
-import model.GameConstants;
-import model.RowChecker;
+import model.*;
 import visible.*;
 
+import javax.swing.*;
 import java.awt.*;
-import java.util.Map;
 
 public class GameController {
 
-    private static final char USER_CHAR = GameConstants.USER_CHAR;
-    private static final char COMP_CHAR = GameConstants.COMP_CHAR;
-    private static final int INDEX_X = GameConstants.INDEX_X;
-    private static final int INDEX_Y = GameConstants.INDEX_Y;
-    private final MainWindow mainWindow = new MainWindow(this);
-    private final Settings settingsWindow = new Settings(this);
-    private GameMap gameMap;
+    private final char FIRST_PLAYER_CHAR;
+    private final char SECOND_PLAYER_CHAR;
+    private final char EMPTY_CHAR;
+    private final int INDEX_X;
+    private final int INDEX_Y;
+    private final int TWO_PLAYERS_MODE = 5;
+    private final MainWindow mainWindow;
+    private final Settings settingsWindow;
+    private final GameMap gameMap;
+    private final RowChecker rowChecker;
+    private final Computer computer;
+    private final GameConstants gameConstants;
+    private JPanel gamePanel;
     private WinScreen winScreen;
-    private RowChecker rowChecker;
-    private Computer computer;
+    private int gameMode;
     private char[][] cells;
+    private char currentChar;
+
+    public GameController() {
+        this.FIRST_PLAYER_CHAR = GameConstants.FIRST_PLAYER_CHAR;
+        this.SECOND_PLAYER_CHAR = GameConstants.SECOND_PLAYER_CHAR;
+        this.EMPTY_CHAR = GameConstants.EMPTY_CHAR;
+        this.INDEX_Y = GameConstants.INDEX_Y;
+        this.INDEX_X = GameConstants.INDEX_X;
+        mainWindow = new MainWindow(this);
+        settingsWindow = new Settings(this);
+        gameMap = new GameMap(this);
+        gameConstants = new GameConstants();
+        rowChecker = new RowChecker(this);
+        computer = new Computer(this);
+        gamePanel = new JPanel();
+        gamePanel.setBackground(Color.GRAY);
+        addGamePanelToMainWindow();
+    }
 
     public void settingsWindowPlayButtonPressed(int gameMode, int fieldSize, int gameWinCount) {
-        gameMap = new GameMap(fieldSize, this);
-        mainWindow.addGamePanel(gameMap.getGamePanel());
-        winScreen = new WinScreen(this);
-        GameConstants gameConstants = new GameConstants(fieldSize);
+        currentChar = FIRST_PLAYER_CHAR;
+        this.gameMode = gameMode;
+        gameConstants.fieldInit(fieldSize);
         cells = gameConstants.getCells();
-        rowChecker = new RowChecker(this, fieldSize, cells, gameWinCount);
-        computer = new Computer(gameMode, fieldSize, gameWinCount, this, cells);
+        gameMap.init(fieldSize);
+        mainWindow.remove(gamePanel);
+        gamePanel = gameMap.getPanel();
+        addGamePanelToMainWindow();
+        rowChecker.init(fieldSize, cells, gameWinCount);
+        if (gameMode != TWO_PLAYERS_MODE) computer.init(gameMode, fieldSize, gameWinCount, cells);
+    }
+
+    private void addGamePanelToMainWindow() {
+        mainWindow.add(gamePanel, BorderLayout.CENTER);
+        gamePanel.setVisible(true);
+        mainWindow.revalidate();
     }
 
     public void gameFieldButtonPressed(int y, int x) {
         try {
-            cells[y][x] = USER_CHAR;
-            rowChecker.checkRaw(USER_CHAR);
-            int[] compMove = computer.makeMove();
-            cells[compMove[INDEX_Y]][compMove[INDEX_X]] = COMP_CHAR;
-            rowChecker.checkRaw(COMP_CHAR);
+            cells[y][x] = currentChar;
+            rowChecker.checkRow(currentChar);
+            if (currentChar == FIRST_PLAYER_CHAR & gameMode == TWO_PLAYERS_MODE) currentChar = SECOND_PLAYER_CHAR;
+            else currentChar = FIRST_PLAYER_CHAR;
+            if (gameMode != TWO_PLAYERS_MODE) {
+                int[] compMove = computer.makeMove(rowChecker.getCompMoves(), rowChecker.getUserMoves());
+                cells[compMove[INDEX_Y]][compMove[INDEX_X]] = SECOND_PLAYER_CHAR;
+                setComputerMoveToGameMap(compMove[INDEX_Y], compMove[INDEX_X]);
+                rowChecker.checkRow(SECOND_PLAYER_CHAR);
+            }
         } catch (InterruptedException e) {
             System.out.println("Begin of new GAME");
         }
     }
 
-    public void showWinScreen(char winnerChar) {
-        winScreen.showScreen(winnerChar);
-    }
-
     public void mainWindowPlayButtonPressed() {
-        settingsWindow.setWindowLocation(mainWindow.getBounds());
+        settingsWindow.setWindowLocation(getBoundsForExternalWindow());
         settingsWindow.setVisible(true);
     }
 
-    public void hideGamePanel() {
-        mainWindow.hideMap();
+    public void showWinScreen(char winnerChar) {
+       winScreen = new WinScreen(this);
+       winScreen.showScreen(winnerChar, gameMode);
+    }
+
+    public void setComputerMoveToGameMap(int y, int x) {
+        gameMap.buttonLowered(y, x, true);
     }
 
     public void showError(String errorString) {
         new ErrorWindow(this, errorString);
     }
 
-    public Rectangle getMainWindowBounds() {
+    public Rectangle getBoundsForExternalWindow() {
         return mainWindow.getBounds();
     }
 
+    public void winScreenClosed(){
+        gamePanel.setVisible(false);
+        winScreen.dispose();
+    }
+
+    public void winScreenPlayAgainButtonPressed(){
+        winScreenClosed();
+        mainWindowPlayButtonPressed();
+    }
+
     public int getVeryEasyGameMode() {
-        return Computer.MODE_VERY_EASY;
+        return Computer.getModeVeryEasy();
     }
 
     public int getEasyGameMode() {
-        return Computer.MODE_EASY;
+        return Computer.getModeEasy();
     }
 
     public int getNormalGameMode() {
-        return Computer.MODE_NORMAL;
+        return Computer.getModeNormal();
     }
 
     public int getHardGameMode() {
-        return Computer.MODE_HARD;
+        return Computer.getModeHard();
     }
 
-    public char getUserChar() {
-        return GameConstants.USER_CHAR;
+    public int getTwoPlayersGameMode() {
+        return TWO_PLAYERS_MODE;
     }
 
-    public char getComputerChar() {
-        return GameConstants.COMP_CHAR;
+    public char getFirstPlayerChar() {
+        return FIRST_PLAYER_CHAR;
+    }
+
+    public char getSecondPlayerChar() {
+        return SECOND_PLAYER_CHAR;
+    }
+
+    public char getEmptyChar() {
+        return EMPTY_CHAR;
     }
 
     public int getWidthForWinScreen() {
@@ -101,15 +155,15 @@ public class GameController {
         return mainWindow.getScreenHeight();
     }
 
-    public void setComputerMove(int y, int x) {
-        gameMap.buttonLowered(y, x, true);
+    public int getIndexX() {
+        return INDEX_X;
     }
 
-    public Map<Integer, int[]> getUserMoves() {
-        return rowChecker.getUserMoves();
+    public int getIndexY() {
+        return INDEX_Y;
     }
 
-    public Map<Integer, int[]> getCompMoves() {
-        return rowChecker.getCompMoves();
+    public char getCurrentChar() {
+        return currentChar;
     }
 }

@@ -9,7 +9,7 @@ import java.awt.*;
 public class Settings extends JDialog {
 
     private static final int WINDOW_WIDTH = 350;
-    private static final int WINDOW_HEIGHT = 270;
+    private static final int WINDOW_HEIGHT = 350;
     private static final int MIN_WIN_LENGTH = 3;
     private static final int MIN_FIELD_SIZE = 3;
     private static final int MAX_FIELD_SIZE = 10;
@@ -23,14 +23,15 @@ public class Settings extends JDialog {
     private JRadioButton easy;
     private JRadioButton normal;
     private JRadioButton hard;
+    private JRadioButton secondPlayer;
     private JSlider slideWinCount;
     private JSlider slideFieldSize;
 
     public Settings(GameController gameController) {
         this.gameController = gameController;
         setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
-        Rectangle gameWindowBounds = gameController.getMainWindowBounds();
-        setWindowLocation(gameWindowBounds);
+        Rectangle bounds = gameController.getBoundsForExternalWindow();
+        setWindowLocation(bounds);
         setTitle("Настройки новой игры");
 
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -45,7 +46,7 @@ public class Settings extends JDialog {
 
     private void createSettingsPanel() {
         settingsPanel = new JPanel();
-        settingsPanel.setLayout(new GridLayout(14, 1));
+        settingsPanel.setLayout(new GridLayout(16, 1));
         settingsPanel.setBorder(new EmptyBorder(0, PADDING, 0, PADDING));
         addGameModeSetup();
         settingsPanel.add(splitter());
@@ -61,15 +62,19 @@ public class Settings extends JDialog {
         easy = new JRadioButton("Легко");
         normal = new JRadioButton("Нормально");
         hard = new JRadioButton("Тяжело");
+        secondPlayer = new JRadioButton("Игра на Двоих");
         ButtonGroup gameMode = new ButtonGroup();
         gameMode.add(veryEasy);
         gameMode.add(easy);
         gameMode.add(normal);
         gameMode.add(hard);
+        gameMode.add(secondPlayer);
         settingsPanel.add(veryEasy);
         settingsPanel.add(easy);
         settingsPanel.add(normal);
         settingsPanel.add(hard);
+        settingsPanel.add(splitter());
+        settingsPanel.add(secondPlayer);
     }
 
     private void addFieldMapControl() {
@@ -108,6 +113,8 @@ public class Settings extends JDialog {
             gameMode = gameController.getNormalGameMode();
         } else if (hard.isSelected()) {
             gameMode = gameController.getHardGameMode();
+        } else if (secondPlayer.isSelected()) {
+            gameMode = gameController.getTwoPlayersGameMode();
         } else {
             throw new RuntimeException("Unexpected game mode!");
         }
@@ -115,7 +122,6 @@ public class Settings extends JDialog {
         int fieldSize = slideFieldSize.getValue();
         int gameWinCount = slideWinCount.getValue();
         dispose();
-
         gameController.settingsWindowPlayButtonPressed(gameMode, fieldSize, gameWinCount);
     }
 
@@ -129,9 +135,9 @@ public class Settings extends JDialog {
         return new JLabel(splitter.toString());
     }
 
-    public void setWindowLocation(Rectangle gameWindowBounds) {
-        int posX = (int) gameWindowBounds.getCenterX() - WINDOW_WIDTH / 2;
-        int posY = (int) gameWindowBounds.getCenterY() - WINDOW_HEIGHT / 2;
+    public void setWindowLocation(Rectangle bounds) {
+        int posX = (int) bounds.getCenterX() - WINDOW_WIDTH / 2;
+        int posY = (int) bounds.getCenterY() - WINDOW_HEIGHT / 2;
         setLocation(posX, posY);
     }
 

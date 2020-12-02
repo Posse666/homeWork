@@ -20,29 +20,27 @@ public class GameMap extends JPanel {
 
     private static final Random RANDOM = new Random();
     private static final int BORDER_SIZE = 36;
-    private static final String USER_ICONS_PATH = "iconX";
-    private static final String COMP_ICONS_PATH = "iconO";
+    private static final String USER_ICONS_PATH = "icons/iconX";
+    private static final String COMP_ICONS_PATH = "icons/iconO";
     private final GameController gameController;
-    private final int fieldSize;
+    private int fieldSize;
     private final ArrayList<ImageIcon> scaledUserIcons = new ArrayList<>();
     private final ArrayList<ImageIcon> scaledCompIcons = new ArrayList<>();
     private JPanel[][] buttonPanels;
     private JButton[][] gameButtons;
-    private final JPanel gamePanel = new JPanel();
+    private JPanel gamePanel;
     private CompoundBorder buttonBorder;
     private CompoundBorder buttonPressedBorder;
     private JButton lastButtonPressed;
     private boolean resourceError = false;
 
-    public GameMap(int fieldSize, GameController gameController) {
+    public GameMap(GameController gameController) {
         this.gameController = gameController;
-        this.fieldSize = fieldSize;
-        drawGamePanel();
-        initScaledIcons(scaledUserIcons, USER_ICONS_PATH);
-        initScaledIcons(scaledCompIcons, COMP_ICONS_PATH);
     }
 
-    private void drawGamePanel() {
+    public void init(int fieldSize) {
+        gamePanel = new JPanel();
+        this.fieldSize = fieldSize;
         int borderDimension = BORDER_SIZE / fieldSize;
         gamePanel.setLayout(new GridLayout(fieldSize, fieldSize));
         gamePanel.setBackground(Color.GRAY);
@@ -65,6 +63,9 @@ public class GameMap extends JPanel {
         }
 
         lastButtonPressed = gameButtons[0][0];
+
+        initScaledIcons(scaledUserIcons, USER_ICONS_PATH);
+        initScaledIcons(scaledCompIcons, COMP_ICONS_PATH);
     }
 
     private JPanel makeButton(JButton gameButton, int y, int x) {
@@ -78,30 +79,28 @@ public class GameMap extends JPanel {
     }
 
     private void jButtonPressed(int y, int x) {
-        buttonLowered(y, x, false);
+        buttonLowered(y, x, gameController.getCurrentChar() != gameController.getFirstPlayerChar());
         gameController.gameFieldButtonPressed(y, x);
     }
 
-    public void buttonLowered(int y, int x, boolean computerMove) {
+    public void buttonLowered(int y, int x, boolean secondPlayerMove) {
         buttonPanels[y][x].setBorder(buttonPressedBorder);
         if (resourceError) {
-            String buttonText = String.valueOf(gameController.getUserChar());
-            if (computerMove) buttonText = String.valueOf(gameController.getComputerChar());
+            String buttonText = String.valueOf(gameController.getFirstPlayerChar());
+            if (secondPlayerMove) buttonText = String.valueOf(gameController.getSecondPlayerChar());
             gameButtons[y][x].setFont(new Font("Serif", Font.PLAIN, gameController.getScreenHeight() / fieldSize / 10));
             gameButtons[y][x].setText(buttonText);
         } else {
             ImageIcon icon = scaledUserIcons.get(getRandomIconNumber(scaledUserIcons.size()));
-            if (computerMove) {
+            if (secondPlayerMove) {
                 icon = scaledCompIcons.get(getRandomIconNumber(scaledCompIcons.size()));
             }
             gameButtons[y][x].setIcon(icon);
             gameButtons[y][x].setDisabledIcon(icon);
         }
         lastButtonPressed.setBackground(Color.GRAY);
-        if (computerMove) {
-            gameButtons[y][x].setBackground(Color.DARK_GRAY);
-            lastButtonPressed = gameButtons[y][x];
-        }
+        gameButtons[y][x].setBackground(Color.DARK_GRAY);
+        lastButtonPressed = gameButtons[y][x];
         gameButtons[y][x].setEnabled(false);
     }
 
@@ -115,7 +114,11 @@ public class GameMap extends JPanel {
                 while (entries.hasMoreElements()) {
                     String name = entries.nextElement().getName();
                     if (name.contains(iconsPath) && name.endsWith(".png"))
-                        scaleIcons(scaledIcons, new ImageIcon(ImageIO.read(getClass().getResourceAsStream(name))));
+                        try {
+                            scaleIcons(scaledIcons, new ImageIcon(ImageIO.read(getClass().getResourceAsStream(name.substring(name.lastIndexOf(iconsPath))))));
+                        } catch (Exception e) {
+                            gameController.showError(e.toString());
+                        }
                 }
                 jar.close();
                 if (scaledIcons.size() == 0) showErrorWindow(jarFile.toString());
@@ -123,7 +126,7 @@ public class GameMap extends JPanel {
                 e.printStackTrace();
             }
         } else { // Run with IDE
-            URL url = GameMap.class.getResource("/" + iconsPath);
+            URL url = GameMap.class.getResource("/" + this.getClass().getPackage().getName() + "/" + iconsPath);
             try {
                 File[] icons = new File(url.toURI()).listFiles();
                 if (icons != null) {
@@ -156,7 +159,7 @@ public class GameMap extends JPanel {
         return RANDOM.nextInt(maxNumber);
     }
 
-    public JPanel getGamePanel() {
+    public JPanel getPanel() {
         return gamePanel;
     }
 }

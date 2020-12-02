@@ -7,24 +7,24 @@ import java.util.*;
 public class RowChecker {
 
     private static final Random RANDOM = new Random();
+    private static final int ILLEGAL_ARRAY_ARGUMENT = -1;
     private final Map<Integer, int[]> compMoves = new HashMap<>();
     private final Map<Integer, int[]> userMoves = new HashMap<>();
     private final int[] userPrevPos = new int[2];
     private final int[] compPrevPos = new int[2];
     private final int[] prevPos = new int[2];
-    private static final int ILLEGAL_ARRAY_ARGUMENT = -1;
-    private static final char USER_CHAR = GameConstants.USER_CHAR;
-    private static final char COMP_CHAR = GameConstants.COMP_CHAR;
-    private static final char EMPTY_CHAR = GameConstants.EMPTY_CHAR;
-    private static final int INDEX_X = GameConstants.INDEX_X;
-    private static final int INDEX_Y = GameConstants.INDEX_Y;
-    private final int WIN_SITUATION_INDEX;
-    private final char[][] cells;
+    private final char FIRST_PLAYER_CHAR;
+    private final char SECOND_PLAYER_CHAR;
+    private final char EMPTY_CHAR;
+    private final int INDEX_X;
+    private final int INDEX_Y;
+    private int WIN_SITUATION_INDEX;
+    private char[][] cells;
     private final int[] userLastAvailablePos = new int[2];
     private final int[] compLastAvailablePos = new int[2];
     private final GameController gameController;
-    private final int fieldSize;
-    private final int gameWinCount;
+    private int fieldSize;
+    private int gameWinCount;
     private char currentChar;
     private boolean draw;
     private int userRow;
@@ -40,15 +40,24 @@ public class RowChecker {
     private boolean possibleFullRow;
     private boolean nonEmptyCharFound;
 
-    public RowChecker(GameController gameController, int fieldSize, char[][] cells, int gameWinCount) {
+    public RowChecker(GameController gameController) {
         this.gameController = gameController;
+        this.FIRST_PLAYER_CHAR = gameController.getFirstPlayerChar();
+        this.SECOND_PLAYER_CHAR = gameController.getSecondPlayerChar();
+        this.EMPTY_CHAR = gameController.getEmptyChar();
+        this.INDEX_X = gameController.getIndexX();
+        this.INDEX_Y = gameController.getIndexY();
+
+    }
+
+    public void init(int fieldSize, char[][] cells, int gameWinCount) {
         this.fieldSize = fieldSize;
         this.cells = cells;
         this.gameWinCount = gameWinCount;
         WIN_SITUATION_INDEX = fieldSize * 2;
     }
 
-    public void checkRaw(char currentChar) throws InterruptedException {
+    public void checkRow(char currentChar) throws InterruptedException {
         this.currentChar = currentChar;
         compMoves.clear();
         userMoves.clear();
@@ -107,8 +116,8 @@ public class RowChecker {
 
     private void getBestMove(int y, int x) throws InterruptedException {
         checkEmptyChar(y, x);
-        checkCurrentChar(y, x, USER_CHAR, COMP_CHAR, userPrevPos, compPrevPos, compMoves);
-        checkCurrentChar(y, x, COMP_CHAR, USER_CHAR, compPrevPos, userPrevPos, userMoves);
+        checkCurrentChar(y, x, FIRST_PLAYER_CHAR, SECOND_PLAYER_CHAR, userPrevPos, compPrevPos, compMoves);
+        checkCurrentChar(y, x, SECOND_PLAYER_CHAR, FIRST_PLAYER_CHAR, compPrevPos, userPrevPos, userMoves);
         if (compRow >= gameWinCount || userRow >= gameWinCount) {
             gameController.showWinScreen(currentChar);
             throw (new InterruptedException());
@@ -123,8 +132,8 @@ public class RowChecker {
             maxPossibleCompRow++;
             maxPossibleUserRow++;
             emptyCells++;
-            setLastAvailablePos(USER_CHAR, userLastAvailablePos, userRow, y, x, lastAvailableUserRow);
-            setLastAvailablePos(COMP_CHAR, compLastAvailablePos, compRow, y, x, lastAvailableCompRaw);
+            setLastAvailablePos(FIRST_PLAYER_CHAR, userLastAvailablePos, userRow, y, x, lastAvailableUserRow);
+            setLastAvailablePos(SECOND_PLAYER_CHAR, compLastAvailablePos, compRow, y, x, lastAvailableCompRaw);
             setPreviousAvailablePos(userPrevPos, y, x);
             setPreviousAvailablePos(compPrevPos, y, x);
             checkMatchedRow(userRow, userPrevPos, userMoves, userLastAvailablePos, maxPossibleUserRow, lastAvailableUserRow, userChars);
@@ -139,7 +148,7 @@ public class RowChecker {
             if (lastAvailableRaw == 0 && lastAvailableRaw < currentRow) {
                 lastAvailablePos[INDEX_Y] = y;
                 lastAvailablePos[INDEX_X] = x;
-                if (currentChar == USER_CHAR) lastAvailableUserRow = currentRow;
+                if (currentChar == FIRST_PLAYER_CHAR) lastAvailableUserRow = currentRow;
                 else lastAvailableCompRaw = currentRow;
             }
         }
@@ -184,7 +193,7 @@ public class RowChecker {
             }
             if (cells[prevPos[INDEX_Y]][prevPos[INDEX_X]] == enemyChar)
                 Arrays.fill(previousPos, ILLEGAL_ARRAY_ARGUMENT);
-            if (currentChar == USER_CHAR) {
+            if (currentChar == FIRST_PLAYER_CHAR) {
                 userRow++;
                 maxPossibleUserRow++;
             } else {
@@ -192,7 +201,7 @@ public class RowChecker {
                 maxPossibleCompRow++;
             }
             if (enemyPrevPos[INDEX_Y] >= 0 && enemyPrevPos[INDEX_X] >= 0)
-                if (currentChar == USER_CHAR) {
+                if (currentChar == FIRST_PLAYER_CHAR) {
                     if (maxPossibleCompRow >= gameWinCount) {
                         moves.put(compRow, new int[]{compPrevPos[INDEX_Y], compPrevPos[INDEX_X]});
                         if (lastMove) moves.put(compChars + 1, new int[]{compPrevPos[INDEX_Y], compPrevPos[INDEX_X]});
@@ -205,7 +214,7 @@ public class RowChecker {
                     if (userRow + 1 >= gameWinCount)
                         moves.put(WIN_SITUATION_INDEX, new int[]{userPrevPos[INDEX_Y], userPrevPos[INDEX_X]});
                 }
-            if (currentChar == USER_CHAR) {
+            if (currentChar == FIRST_PLAYER_CHAR) {
                 compRow = 0;
                 maxPossibleCompRow = 0;
                 userChars++;
