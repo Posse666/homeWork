@@ -15,6 +15,8 @@ public class Main1 {
         System.out.println(Arrays.toString(generatedArray));
         System.out.println(getUniqueWords(generatedArray));
         System.out.println(countUsedWords(generatedArray));
+        System.out.println(countUsedWordsV2(generatedArray));
+        System.out.println(countUsedWordsV3(generatedArray));
     }
 
     private static HashSet<String> getUniqueWords(String[] inputArray) {
@@ -27,6 +29,38 @@ public class Main1 {
         HashSet<String> uniqueWords = getUniqueWords(inputString);
         for (String key : uniqueWords) {
             uniqueWordsCounter.put(key, Collections.frequency(inputArray, key));
+        }
+        return uniqueWordsCounter;
+    }
+
+    private static HashMap<String, Integer> countUsedWordsV2(String[] inputString) {
+        HashMap<String, Integer> uniqueWordsCounter = new HashMap<>();
+        ArrayList<String> inputArray = new ArrayList<>(Arrays.asList(inputString));
+        HashSet<String> uniqueWords = getUniqueWords(inputString);
+        Iterator<String> uniqueIterator = uniqueWords.iterator();
+        while (uniqueIterator.hasNext()) {
+            String uniqueWord = uniqueIterator.next();
+            Iterator<String> arrayIterator = inputArray.iterator();
+            int counter = 0;
+            while (arrayIterator.hasNext()) {
+                String arrayWord = arrayIterator.next();
+                if (uniqueWord.equals(arrayWord)) counter++;
+            }
+            uniqueWordsCounter.put(uniqueWord, counter);
+        }
+        return uniqueWordsCounter;
+    }
+
+    private static HashMap<String, Integer> countUsedWordsV3(String[] inputString) {
+        HashMap<String, Integer> uniqueWordsCounter = new HashMap<>();
+        HashSet<String> uniqueWords = getUniqueWords(inputString);
+        int counter;
+        for (int i = 0; i < uniqueWords.size(); i++) {
+            counter = 0;
+            for (int j = 0; j < inputString.length; j++) {
+                if (uniqueWords.toArray()[i].equals(inputString[j])) counter++;
+            }
+            uniqueWordsCounter.put(uniqueWords.toArray()[i].toString(), counter);
         }
         return uniqueWordsCounter;
     }

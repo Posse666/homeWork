@@ -3,21 +3,31 @@ import java.util.HashMap;
 
 public class PhoneBook {
 
-    private final HashMap<String, Person> phoneBook = new HashMap<>();
-
-    public Person getPersonCard(String surname) {
-        return phoneBook.get(surname);
-    }
+    private final HashMap<String, ArrayList<Person>> phoneBook = new HashMap<>();
 
     public void putPhone(String surname, String name, String phoneNumber, String eMail) {
-        phoneBook.put(surname, new Person(surname, name, phoneNumber, eMail));
+        if (!phoneBook.containsKey(surname)) phoneBook.put(surname, new ArrayList<>());
+        phoneBook.get(surname).add(new Person(surname, name, phoneNumber, eMail));
     }
 
     public ArrayList<String> getPhoneNumber(String surname) {
-        ArrayList<String> phone = new ArrayList<>();
-        for (HashMap.Entry<String, Person> entry : phoneBook.entrySet()) {
-            if (entry.getKey().equals(surname)) phone.add(entry.getValue().getPhoneNumber());
+        return getPersonData(surname, true, false);
+    }
+
+    public ArrayList<String> getEMail(String surname) {
+        return getPersonData(surname, false, true);
+    }
+
+    private ArrayList<String> getPersonData(String surname, boolean phoneNumber, boolean eMail) {
+        ArrayList<String> data = new ArrayList<>();
+        for (HashMap.Entry<String, ArrayList<Person>> entry : phoneBook.entrySet()) {
+            if (entry.getKey().equals(surname)) {
+                for (int i = 0; i < entry.getValue().size(); i++) {
+                    if (phoneNumber) data.add(entry.getValue().get(i).getPhoneNumber());
+                    if (eMail) data.add(entry.getValue().get(i).getEMail());
+                }
+            }
         }
-        return phone;
+        return data;
     }
 }
