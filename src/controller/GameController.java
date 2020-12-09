@@ -32,12 +32,12 @@ public class GameController {
         this.EMPTY_CHAR = GameConstants.EMPTY_CHAR;
         this.INDEX_Y = GameConstants.INDEX_Y;
         this.INDEX_X = GameConstants.INDEX_X;
+        gameConstants = new GameConstants();
         mainWindow = new MainWindow(this);
         settingsWindow = new Settings(this);
         gameMap = new GameMap(this);
-        gameConstants = new GameConstants();
         rowChecker = new RowChecker(this);
-        computer = new Computer(this);
+        computer = new Computer();
         gamePanel = new JPanel();
         gamePanel.setBackground(Color.GRAY);
         addGamePanelToMainWindow();
@@ -153,14 +153,6 @@ public class GameController {
 
     public int getScreenHeight() {
         return mainWindow.getScreenHeight();
-    }
-
-    public int getIndexX() {
-        return INDEX_X;
-    }
-
-    public int getIndexY() {
-        return INDEX_Y;
     }
 
     public char getCurrentChar() {

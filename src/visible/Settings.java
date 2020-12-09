@@ -12,7 +12,7 @@ public class Settings extends JDialog {
     private static final int WINDOW_HEIGHT = 350;
     private static final int MIN_WIN_LENGTH = 3;
     private static final int MIN_FIELD_SIZE = 3;
-    private static final int MAX_FIELD_SIZE = 10;
+    private static final int MAX_FIELD_SIZE = 20;
     private static final int PADDING = 10;
     private static final String FIELD_SIZE_PREFIX = "Размер поля: ";
     private static final String WIN_LENGTH_PREFIX = "Условие победы: ";
@@ -51,9 +51,9 @@ public class Settings extends JDialog {
         addGameModeSetup();
         settingsPanel.add(splitter());
         addFieldMapControl();
-        JButton btnPlay = new JButton("Начать новую игру!");
-        btnPlay.addActionListener(e -> buttonPlayGameClick());
-        settingsPanel.add(btnPlay);
+        JButton buttonPlay = new JButton("Начать новую игру!");
+        buttonPlay.addActionListener(e -> buttonPlayGameClick());
+        settingsPanel.add(buttonPlay);
     }
 
     private void addGameModeSetup() {
@@ -87,6 +87,7 @@ public class Settings extends JDialog {
             labelFieldSize.setText(FIELD_SIZE_PREFIX + currentValue);
             int winDifference = 2;
             if (currentValue < MIN_FIELD_SIZE + winDifference) winDifference = 0;
+            if (currentValue > 9) currentValue = 9;
             slideWinCount.setMaximum(currentValue - winDifference);
         });
 

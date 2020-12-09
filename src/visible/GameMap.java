@@ -24,8 +24,8 @@ public class GameMap extends JPanel {
     private static final String COMP_ICONS_PATH = "icons/iconO";
     private final GameController gameController;
     private int fieldSize;
-    private final ArrayList<ImageIcon> scaledUserIcons = new ArrayList<>();
-    private final ArrayList<ImageIcon> scaledCompIcons = new ArrayList<>();
+    private ArrayList<ImageIcon> scaledUserIcons;
+    private ArrayList<ImageIcon> scaledCompIcons;
     private JPanel[][] buttonPanels;
     private JButton[][] gameButtons;
     private JPanel gamePanel;
@@ -39,6 +39,8 @@ public class GameMap extends JPanel {
     }
 
     public void init(int fieldSize) {
+        scaledUserIcons = new ArrayList<>();
+        scaledCompIcons = new ArrayList<>();
         gamePanel = new JPanel();
         this.fieldSize = fieldSize;
         int borderDimension = BORDER_SIZE / fieldSize;

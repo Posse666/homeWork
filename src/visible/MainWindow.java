@@ -9,6 +9,8 @@ public class MainWindow extends JFrame {
 
     private static final int SCREEN_WIDTH = Toolkit.getDefaultToolkit().getScreenSize().width;
     private static final int SCREEN_HEIGHT = Toolkit.getDefaultToolkit().getScreenSize().height;
+    private static final int WIDTH = SCREEN_HEIGHT * 3 / 4;
+    private static final int HEIGHT = SCREEN_HEIGHT * 3 / 4;
 
     public MainWindow(GameController gameController) {
         draw();
@@ -26,8 +28,8 @@ public class MainWindow extends JFrame {
     }
 
     private void draw() {
-        setSize(SCREEN_HEIGHT / 2, SCREEN_HEIGHT / 2);
-        setLocation(SCREEN_WIDTH / 2 - SCREEN_HEIGHT / 4, SCREEN_HEIGHT / 4);
+        setSize(WIDTH, HEIGHT);
+        setLocation(SCREEN_WIDTH / 2 - WIDTH / 2, SCREEN_HEIGHT / 2 - HEIGHT / 2);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setTitle("Крестики - Нолики");
     }

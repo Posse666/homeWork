@@ -1,7 +1,5 @@
 package model;
 
-import controller.GameController;
-
 import java.util.Map;
 import java.util.Random;
 
@@ -13,8 +11,8 @@ public class Computer {
     private static final int MODE_HARD = 3;
 
     private static final Random RANDOM = new Random();
-    private final int INDEX_X;
-    private final int INDEX_Y;
+    private static final int INDEX_X = GameConstants.INDEX_X;
+    private static final int INDEX_Y = GameConstants.INDEX_Y;
 
     private int gameMode;
     private int fieldSize;
@@ -25,16 +23,8 @@ public class Computer {
     private Map<Integer, int[]> compMoves;
     private Map<Integer, int[]> userMoves;
 
-    private final GameController gameController;
-
     private int[] compPositionToMove = new int[2];
     private int[] userBestPosition = new int[2];
-
-    public Computer(GameController gameController) {
-        this.gameController = gameController;
-        INDEX_X = gameController.getIndexX();
-        INDEX_Y = gameController.getIndexY();
-    }
 
     public void init(int gameMode, int fieldSize, int gameWinCount, char[][] cells) {
         this.fieldSize = fieldSize;
@@ -102,14 +92,14 @@ public class Computer {
     }
 
     private void putCenterAt3x3() {
-        if (fieldSize == 3 && cells[1][1] == gameController.getEmptyChar()) {
+        if (fieldSize == 3 && cells[1][1] == GameConstants.EMPTY_CHAR) {
             compPositionToMove[INDEX_Y] = 1;
             compPositionToMove[INDEX_X] = 1;
         }
     }
 
     private boolean isUsedCell(int y, int x) {
-        return cells[y][x] != gameController.getEmptyChar();
+        return cells[y][x] != GameConstants.EMPTY_CHAR;
     }
 
     private void getUserAndCompBestMoves() {

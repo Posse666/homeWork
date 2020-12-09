@@ -13,11 +13,11 @@ public class RowChecker {
     private final int[] userPrevPos = new int[2];
     private final int[] compPrevPos = new int[2];
     private final int[] prevPos = new int[2];
-    private final char FIRST_PLAYER_CHAR;
-    private final char SECOND_PLAYER_CHAR;
-    private final char EMPTY_CHAR;
-    private final int INDEX_X;
-    private final int INDEX_Y;
+    private static final char FIRST_PLAYER_CHAR = GameConstants.FIRST_PLAYER_CHAR;
+    private static final char SECOND_PLAYER_CHAR = GameConstants.SECOND_PLAYER_CHAR;
+    private static final char EMPTY_CHAR = GameConstants.EMPTY_CHAR;
+    private static final int INDEX_X = GameConstants.INDEX_X;
+    private static final int INDEX_Y = GameConstants.INDEX_Y;
     private int WIN_SITUATION_INDEX;
     private char[][] cells;
     private final int[] userLastAvailablePos = new int[2];
@@ -42,12 +42,6 @@ public class RowChecker {
 
     public RowChecker(GameController gameController) {
         this.gameController = gameController;
-        this.FIRST_PLAYER_CHAR = gameController.getFirstPlayerChar();
-        this.SECOND_PLAYER_CHAR = gameController.getSecondPlayerChar();
-        this.EMPTY_CHAR = gameController.getEmptyChar();
-        this.INDEX_X = gameController.getIndexX();
-        this.INDEX_Y = gameController.getIndexY();
-
     }
 
     public void init(int fieldSize, char[][] cells, int gameWinCount) {
@@ -144,7 +138,7 @@ public class RowChecker {
     }
 
     private void setLastAvailablePos(char currentChar, int[] lastAvailablePos, int currentRow, int y, int x, int lastAvailableRaw) {
-        if (cells[prevPos[INDEX_Y]][prevPos[INDEX_X]] == currentChar) {
+        if (cells[prevPos[INDEX_Y]][prevPos[INDEX_X]] == currentChar && !isUsedCell(y, x)) {
             if (lastAvailableRaw == 0 && lastAvailableRaw < currentRow) {
                 lastAvailablePos[INDEX_Y] = y;
                 lastAvailablePos[INDEX_X] = x;
@@ -282,6 +276,10 @@ public class RowChecker {
             numbersGenerated.add(randomNumber);
         }
         return numbersGenerated;
+    }
+
+    private boolean isUsedCell(int y, int x) {
+        return cells[y][x] != EMPTY_CHAR;
     }
 
     public Map<Integer, int[]> getCompMoves() {
