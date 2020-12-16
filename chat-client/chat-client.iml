@@ -9,5 +9,6 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="chat-library" />
     <orderEntry type="module" module-name="network" />
+    <orderEntry type="library" name="J2_Stream201126" level="application" />
   </component>
 </module>
