@@ -1,5 +1,6 @@
 package ru.geekbrains.java_two.chat.client;
 
+import ru.geekbrains.java_two.chat.library.Protocol;
 import ru.geekbrains.java_two.network.SocketThread;
 import ru.geekbrains.java_two.network.SocketThreadListener;
 
@@ -19,7 +20,7 @@ public class ClientGUI extends JFrame implements ActionListener,
 
     private final JTextArea log = new JTextArea();
 
-    private final JPanel panelTop = new JPanel(new GridLayout(0, 3));
+    private final JPanel panelTop = new JPanel(new GridLayout(2, 3));
     private final JTextField tfIPAddress = new JTextField("127.0.0.1");
     private final JTextField tfPort = new JTextField("8189");
     private final JCheckBox cbAlwaysOnTop = new JCheckBox("Always on top");
@@ -34,7 +35,6 @@ public class ClientGUI extends JFrame implements ActionListener,
 
     private final JList<String> userList = new JList<>();
     private boolean shownIoErrors = false;
-    private boolean isSocketCreated = false;
     private SocketThread socketThread;
 
     public static void main(String[] args) {
@@ -48,9 +48,7 @@ public class ClientGUI extends JFrame implements ActionListener,
 
     private ClientGUI() {
         Thread.setDefaultUncaughtExceptionHandler(this);
-
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        setTitle("Chat client");
         setLocationRelativeTo(null);
         setSize(WIDTH, HEIGHT);
         log.setEditable(false);
@@ -58,7 +56,7 @@ public class ClientGUI extends JFrame implements ActionListener,
         JScrollPane scrollLog = new JScrollPane(log);
         JScrollPane scrollUsers = new JScrollPane(userList);
         String[] users = {"user1", "user2", "user3", "user4", "user5", "user6",
-                "user_with_an_exceptionally_long_nickname"};
+                            "user_with_an_exceptionally_long_nickname"};
         userList.setListData(users);
         scrollUsers.setPreferredSize(new Dimension(100, 0));
         cbAlwaysOnTop.addActionListener(this);
@@ -67,24 +65,21 @@ public class ClientGUI extends JFrame implements ActionListener,
         btnLogin.addActionListener(this);
         btnDisconnect.addActionListener(this);
 
-//        panelTop.add(tfIPAddress);
-//        panelTop.add(tfPort);
-        panelTop.add(tfLogin);
-        panelTop.add(tfPassword);
-        panelTop.add(cbAlwaysOnTop);
         panelTop.add(tfIPAddress);
         panelTop.add(tfPort);
-//        panelTop.add(tfLogin);
-//        panelTop.add(tfPassword);
+        panelTop.add(cbAlwaysOnTop);
+        panelTop.add(tfLogin);
+        panelTop.add(tfPassword);
         panelTop.add(btnLogin);
         panelBottom.add(btnDisconnect, BorderLayout.WEST);
         panelBottom.add(tfMessage, BorderLayout.CENTER);
         panelBottom.add(btnSend, BorderLayout.EAST);
+        panelBottom.setVisible(false);
 
         add(scrollLog, BorderLayout.CENTER);
         add(scrollUsers, BorderLayout.EAST);
         add(panelTop, BorderLayout.NORTH);
-//        add(panelBottom, BorderLayout.SOUTH);
+        add(panelBottom, BorderLayout.SOUTH);
 
         setVisible(true);
     }
@@ -95,42 +90,11 @@ public class ClientGUI extends JFrame implements ActionListener,
         if (src == cbAlwaysOnTop) {
             setAlwaysOnTop(cbAlwaysOnTop.isSelected());
         } else if (src == btnSend || src == tfMessage) {
-            if (socketThread == null || !socketThread.isAlive()) {
-                System.out.println("Socket not running");
-            } else {
-                sendMessage();
-            }
+            sendMessage();
         } else if (src == btnLogin) {
-            if (socketThread == null || !socketThread.isAlive()) {
-                connect();
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException interruptedException) {
-                    interruptedException.printStackTrace();
-                }
-                if (isSocketCreated) {
-                    panelTop.remove(tfIPAddress);
-                    panelTop.remove(tfPort);
-                    panelTop.remove(btnLogin);
-                    tfLogin.setVisible(false);
-                    tfPassword.setVisible(false);
-                    add(panelBottom, BorderLayout.SOUTH);
-                    revalidate();
-                }
-            } else System.out.println("Already connected");
+            connect();
         } else if (src == btnDisconnect) {
-            if (socketThread == null || !socketThread.isAlive()) {
-                System.out.println("Socket already closed");
-            } else {
-                socketThread.close();
-                remove(panelBottom);
-                panelTop.add(tfIPAddress);
-                panelTop.add(tfPort);
-                panelTop.add(btnLogin);
-                tfLogin.setVisible(true);
-                tfPassword.setVisible(true);
-                revalidate();
-            }
+            socketThread.close();
         } else {
             throw new RuntimeException("Undefined source: " + src);
         }
@@ -139,7 +103,9 @@ public class ClientGUI extends JFrame implements ActionListener,
     private void connect() {
         try {
             Socket s = new Socket(tfIPAddress.getText(), Integer.parseInt(tfPort.getText()));
-            socketThread = new SocketThread(this, "Client", s);
+            socketThread = new SocketThread(this, "Client " + tfLogin.getText(), s);
+            socketThread.sendMessage(Protocol.getAuthRequest(
+                    tfLogin.getText(), new String(tfPassword.getPassword())));
         } catch (IOException e) {
             e.printStackTrace();
             showException(Thread.currentThread(), e);
@@ -199,7 +165,7 @@ public class ClientGUI extends JFrame implements ActionListener,
 
     /**
      * Socket thread listener methods implementation
-     */
+     * */
 
     @Override
     public void onSocketStart(SocketThread thread, Socket socket) {
@@ -208,14 +174,16 @@ public class ClientGUI extends JFrame implements ActionListener,
 
     @Override
     public void onSocketStop(SocketThread thread) {
-        putLog("Socket stopped from thread: " + thread.getName());
-        isSocketCreated = false;
+        putLog("Socket stopped");
+        panelBottom.setVisible(false);
+        panelTop.setVisible(true);
     }
 
     @Override
     public void onSocketReady(SocketThread thread, Socket socket) {
         putLog("Socket ready");
-        isSocketCreated = true;
+        panelBottom.setVisible(true);
+        panelTop.setVisible(false);
     }
 
     @Override
