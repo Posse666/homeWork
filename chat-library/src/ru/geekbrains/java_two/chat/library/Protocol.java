@@ -1,5 +1,8 @@
 package ru.geekbrains.java_two.chat.library;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+
 public class Protocol {
     //common data
     // ±
@@ -20,6 +23,7 @@ public class Protocol {
     // если мы вдруг не поняли, что за сообщение и не смогли разобрать
     public static final String TYPE_BROADCAST = "/bcast";
     // то есть сообщение, которое будет посылаться всем
+    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("[HH:mm:ss]");
 
 
     public static String getAuthRequest(String login, String password) {
@@ -39,7 +43,7 @@ public class Protocol {
     }
 
     public static String getTypeBroadcast(String src, String message) {
-        return TYPE_BROADCAST + DELIMITER + System.currentTimeMillis() +
+        return TYPE_BROADCAST + DELIMITER + DATE_FORMAT.format(System.currentTimeMillis()) +
                 DELIMITER + src + DELIMITER + message;
     }
 }

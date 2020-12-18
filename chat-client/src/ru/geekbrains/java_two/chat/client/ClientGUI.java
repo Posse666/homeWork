@@ -103,7 +103,7 @@ public class ClientGUI extends JFrame implements ActionListener,
     private void connect() {
         try {
             Socket s = new Socket(tfIPAddress.getText(), Integer.parseInt(tfPort.getText()));
-            socketThread = new SocketThread(this, "Client", s);
+            socketThread = new SocketThread(this, "Client " + tfLogin.getText(), s);
             socketThread.sendMessage(Protocol.getAuthRequest(
                     tfLogin.getText(), new String(tfPassword.getPassword())));
         } catch (IOException e) {
@@ -114,13 +114,10 @@ public class ClientGUI extends JFrame implements ActionListener,
 
     private void sendMessage() {
         String msg = tfMessage.getText();
-//        String username = tfLogin.getText();
         if ("".equals(msg)) return;
         tfMessage.setText(null);
         tfMessage.grabFocus();
         socketThread.sendMessage(msg);
-//        putLog(String.format("%s: %s", username, msg));
-//        wrtMsgToLogFile(msg, username);
     }
 
     private void wrtMsgToLogFile(String msg, String username) {
@@ -180,7 +177,6 @@ public class ClientGUI extends JFrame implements ActionListener,
         putLog("Socket stopped");
         panelBottom.setVisible(false);
         panelTop.setVisible(true);
-
     }
 
     @Override

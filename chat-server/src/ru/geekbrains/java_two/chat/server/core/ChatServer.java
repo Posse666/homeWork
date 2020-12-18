@@ -50,13 +50,13 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
     @Override
     public void onServerStart(ServerSocketThread thread) {
         putLog("Server socket thread started");
-        SqlClient.connect();
+//        SqlClient.connect(); //todo подключиться к бд
     }
 
     @Override
     public void onServerStop(ServerSocketThread thread) {
         putLog("Server socket thread stopped");
-        SqlClient.disconnect();
+//        SqlClient.disconnect(); //todo отключиться от бд
     }
 
     @Override
@@ -122,7 +122,8 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
         }
         String login = arr[1];
         String password = arr[2];
-        String nickname = SqlClient.getNickname(login, password);
+//        String nickname = SqlClient.getNickname(login, password); //todo взять ник из бд по логину/паролю
+        String nickname = "user"; //todo временная заглушка
         if (nickname == null) {
             putLog("Invalid credentials attempt for login = " + login);
             client.authFail();
