@@ -37,6 +37,7 @@ public class SocketThread extends Thread {
     }
 
     public synchronized boolean sendMessage(String msg) {
+        //msgformatter, serializer, jsonifier
         try {
             out.writeUTF(msg);
             out.flush();
@@ -48,12 +49,7 @@ public class SocketThread extends Thread {
         }
     }
 
-    public void close() {
-        try {
-            out.close();
-        } catch (IOException e) {
-            listener.onSocketException(this, e);
-        }
+    public synchronized void close() {
         interrupt();
         try {
             socket.close();
