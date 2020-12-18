@@ -5,6 +5,8 @@ import ru.geekbrains.java_two.network.SocketThread;
 import ru.geekbrains.java_two.network.SocketThreadListener;
 
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class ClientThread extends SocketThread {
 
@@ -39,5 +41,28 @@ public class ClientThread extends SocketThread {
         close();
     }
 
+    @Override
+    public synchronized boolean sendMessage(String msg) {
+        ArrayList<String> unformatted = new ArrayList<>(Arrays.asList(msg.split(Protocol.DELIMITER)));
+        removeProtocolInfo(unformatted);
+        msg = createFormattedMessage(unformatted);
+        return super.sendMessage(msg);
+    }
 
+    private synchronized void removeProtocolInfo(ArrayList<String> arr) {
+        arr.remove(Protocol.AUTH_ACCEPT);
+        arr.remove(Protocol.AUTH_DENIED);
+        arr.remove(Protocol.AUTH_REQUEST);
+        arr.remove(Protocol.MSG_FORMAT_ERROR);
+        arr.remove(Protocol.TYPE_BROADCAST);
+    }
+
+    private synchronized String createFormattedMessage(ArrayList<String> arr) {
+        StringBuilder msgBuilder = new StringBuilder();
+        for (int i = 0; i < arr.size(); i++) {
+            msgBuilder.append(arr.get(i));
+            if (i + 1 < arr.size()) msgBuilder.append(": ");
+        }
+        return msgBuilder.toString();
+    }
 }
