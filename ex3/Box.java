@@ -28,7 +28,12 @@ public class Box<T extends Fruit> {
     }
 
     public void addFruit(T fruit) {
-        fruits.add(fruit);
+        if (fruits.size() >= capacity) {
+            System.out.println("Cant add fruit to box " + name +"! Box if FULL!");
+        } else {
+            fruits.add(fruit);
+            System.out.println("Fruit added to box " + name);
+        }
     }
 
     public boolean compare(Box<?> box) {
@@ -36,6 +41,10 @@ public class Box<T extends Fruit> {
     }
 
     public void addFruitsFromAnotherBox(Box<T> box) {
+        System.out.println("Trying to add " + box.fruits.size() +
+                " fruits from box " + box.name +
+                " to box " + name + ", which now has " + fruits.size() +
+                " fruits and maximum capacity is " + capacity);
         int count = capacity - fruits.size();
         if (fruits.size() + box.fruits.size() <= capacity) {
             count = box.fruits.size();

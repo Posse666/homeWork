@@ -19,7 +19,9 @@ public class Main {
         System.out.println(boxWithOranges.getWeight());
         System.out.println(boxWithOranges.compare(boxWithApples));
         boxWithApples.addFruitsFromAnotherBox(boxWithApples2);
+        boxWithApples2.addFruit(new Apple());
         boxWithApples2.addFruitsFromAnotherBox(boxWithApples3);
+        boxWithApples.addFruit(new Apple());
     }
 
     private static <T extends Fruit> List<T> getFruits(Class<T> fruit, int quantity) {

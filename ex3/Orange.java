@@ -3,6 +3,6 @@ package ex3;
 public class Orange extends Fruit {
 
     public Orange() {
-        weight = 1.5f;
+        super(1.5f);
     }
 }
