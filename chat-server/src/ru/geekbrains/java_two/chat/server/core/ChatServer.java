@@ -10,10 +10,12 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Vector;
 
 public class ChatServer implements ServerSocketThreadListener, SocketThreadListener {
     private final DateFormat DATE_FORMAT = new SimpleDateFormat("[HH:mm:ss] ");
+    private final int quantityOfLastMessagesOnUserLogin = 30;
     private ServerSocketThread server;
     private ChatServerListener listener;
     private Vector<SocketThread> clients;
@@ -124,7 +126,27 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
         String msgType = arr[0];
         switch (msgType) {
             case Protocol.USER_BROADCAST:
+                SqlClient.putMessageToDB(Protocol.getTypeBroadcast(client.getNickname(), arr[1]));
                 sendToAllAuthorizedClients(Protocol.getTypeBroadcast(client.getNickname(), arr[1]));
+                break;
+            case Protocol.USER_CHANGE_NICKNAME:
+                if (arr.length != 4) {
+                    client.sendMessage("Invalid nickname!");
+                    return;
+                }
+                String login = arr[1];
+                String password = arr[2];
+                String newNickname = arr[3];
+                String nickname = SqlClient.getNickname(login, password);
+                if (nickname == null) {
+                    putLog("Invalid credentials attempt for login = " + login);
+                    client.authFail();
+                    return;
+                }
+                sendToAllAuthorizedClients(Protocol.getTypeBroadcast("Server", "User " + nickname + " changed nickname to " + newNickname));
+                SqlClient.changeNickname(newNickname, login, password);
+                client.setNickname(newNickname);
+                sendToAllAuthorizedClients(Protocol.getUserList(getUsers()));
                 break;
             default:
                 client.msgFormatError(msg);
@@ -149,6 +171,10 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
             client.authAccept(nickname);
             if (oldClient == null) {
                 sendToAllAuthorizedClients(Protocol.getTypeBroadcast("Server", nickname + " connected"));
+                ArrayList<String> messages = SqlClient.getMessagesFromDB(quantityOfLastMessagesOnUserLogin);
+                for (int i = 0; i < messages.size(); i++) {
+                    client.sendMessage(messages.get(i));
+                }
             } else {
                 oldClient.reconnect();
                 clients.remove(oldClient);

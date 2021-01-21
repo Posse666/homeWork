@@ -10,6 +10,7 @@ public class Protocol {
     public static final String TYPE_BROADCAST = "/bcast";
     public static final String USER_LIST = "/user_list";
     public static final String USER_BROADCAST = "/user_bcast";
+    public static final String USER_CHANGE_NICKNAME = "/user_change_nickname";
 
     public static String getUserBroadcast(String msg) {
         return USER_BROADCAST + DELIMITER + msg;
@@ -38,5 +39,9 @@ public class Protocol {
     public static String getTypeBroadcast(String src, String message) {
         return TYPE_BROADCAST + DELIMITER + System.currentTimeMillis() +
                 DELIMITER + src + DELIMITER + message;
+    }
+
+    public static String getChangeNickname(String newNickname, String login, String password) {
+        return USER_CHANGE_NICKNAME + DELIMITER + login + DELIMITER + password + DELIMITER + newNickname;
     }
 }

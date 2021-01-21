@@ -25,13 +25,21 @@ public class ClientGUI extends JFrame implements ActionListener,
 
     private final JTextArea log = new JTextArea();
 
-    private final JPanel panelTop = new JPanel(new GridLayout(2, 3));
+    private final JPanel panelTop = new JPanel(new GridLayout(2, 1));
     private final JTextField tfIPAddress = new JTextField("127.0.0.1");
     private final JTextField tfPort = new JTextField("8189");
     private final JCheckBox cbAlwaysOnTop = new JCheckBox("Always on top");
-    private final JTextField tfLogin = new JTextField("ivan");
+    private final JTextField tfLogin = new JTextField("test");
     private final JPasswordField tfPassword = new JPasswordField("123");
     private final JButton btnLogin = new JButton("Login");
+
+    private final JButton btnChangeNickname = new JButton("Submit");
+    private final JTextField tfNewNickname = new JTextField("NewNickname");
+
+    private final JPanel panelLogin = new JPanel(new GridLayout(1, 0));
+    private final JPanel panelIp = new JPanel(new GridLayout(1, 0));
+    private final JPanel panelNickname = new JPanel(new GridLayout(1, 0));
+    private final JPanel panelIpAndNickname = new JPanel(new GridLayout(1, 0));
 
     private final JPanel panelBottom = new JPanel(new BorderLayout());
     private final JButton btnDisconnect = new JButton("<html><b>Disconnect</b></html>");
@@ -58,13 +66,19 @@ public class ClientGUI extends JFrame implements ActionListener,
         tfMessage.addActionListener(this);
         btnLogin.addActionListener(this);
         btnDisconnect.addActionListener(this);
+        btnChangeNickname.addActionListener(this);
 
-        panelTop.add(tfIPAddress);
-        panelTop.add(tfPort);
-        panelTop.add(cbAlwaysOnTop);
-        panelTop.add(tfLogin);
-        panelTop.add(tfPassword);
-        panelTop.add(btnLogin);
+        panelIp.add(tfIPAddress);
+        panelIp.add(tfPort);
+        panelNickname.add(tfNewNickname);
+        panelNickname.add(btnChangeNickname);
+        panelLogin.add(tfLogin);
+        panelLogin.add(tfPassword);
+        panelLogin.add(btnLogin);
+        panelIpAndNickname.add(cbAlwaysOnTop);
+        panelIpAndNickname.add(panelIp);
+        panelTop.add(panelIpAndNickname);
+        panelTop.add(panelLogin);
         panelBottom.add(btnDisconnect, BorderLayout.WEST);
         panelBottom.add(tfMessage, BorderLayout.CENTER);
         panelBottom.add(btnSend, BorderLayout.EAST);
@@ -72,6 +86,7 @@ public class ClientGUI extends JFrame implements ActionListener,
 
         add(scrollLog, BorderLayout.CENTER);
         add(scrollUsers, BorderLayout.EAST);
+
         add(panelTop, BorderLayout.NORTH);
         add(panelBottom, BorderLayout.SOUTH);
 
@@ -98,6 +113,8 @@ public class ClientGUI extends JFrame implements ActionListener,
             connect();
         } else if (src == btnDisconnect) {
             socketThread.close();
+        } else if (src == btnChangeNickname) {
+            socketThread.sendMessage(Protocol.getChangeNickname(tfNewNickname.getText(), tfLogin.getText(), new String(tfPassword.getPassword())));
         } else {
             throw new RuntimeException("Undefined source: " + src);
         }
@@ -176,7 +193,11 @@ public class ClientGUI extends JFrame implements ActionListener,
     public void onSocketStop(SocketThread thread) {
         putLog("Socket stopped");
         panelBottom.setVisible(false);
-        panelTop.setVisible(true);
+        panelIpAndNickname.remove(panelNickname);
+        panelIpAndNickname.add(panelIp);
+        panelLogin.add(btnLogin);
+        panelTop.revalidate();
+        panelTop.repaint();
         setTitle(WINDOW_TITLE);
         userList.setListData(new String[0]);
     }
@@ -200,7 +221,11 @@ public class ClientGUI extends JFrame implements ActionListener,
             case Protocol.AUTH_ACCEPT:
                 setTitle(WINDOW_TITLE + " nickname: " + arr[1]);
                 panelBottom.setVisible(true);
-                panelTop.setVisible(false);
+                panelIpAndNickname.remove(panelIp);
+                panelIpAndNickname.add(panelNickname);
+                panelLogin.remove(btnLogin);
+                panelTop.revalidate();
+                panelTop.repaint();
                 break;
             case Protocol.AUTH_DENIED:
                 putLog("Authorization failed");
