@@ -30,9 +30,10 @@ public class SqlClient {
         try {
             nicknameQuery.setString(1, login);
             nicknameQuery.setString(2, password);
-            ResultSet set = nicknameQuery.executeQuery();
-            if (set.next()) {
-                return set.getString("nickname");
+            try (ResultSet set = nicknameQuery.executeQuery()) {
+                if (set.next()) {
+                    return set.getString("nickname");
+                }
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -64,11 +65,12 @@ public class SqlClient {
         ArrayList<String> messages = new ArrayList<>();
         try {
             getMessageQuery.setInt(1, count);
-            ResultSet set = getMessageQuery.executeQuery();
-            while (set.next()) {
-                messages.add(set.getString("message"));
+            try (ResultSet set = getMessageQuery.executeQuery()) {
+                while (set.next()) {
+                    messages.add(set.getString("message"));
+                }
+                return messages;
             }
-            return messages;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
