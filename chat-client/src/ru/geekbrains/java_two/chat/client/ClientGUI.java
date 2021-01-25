@@ -8,11 +8,15 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class ClientGUI extends JFrame implements ActionListener,
@@ -49,6 +53,9 @@ public class ClientGUI extends JFrame implements ActionListener,
     private final JList<String> userList = new JList<>();
     private boolean shownIoErrors = false;
     private SocketThread socketThread;
+
+    private Path logPath;
+    private Path logFile;
 
     private ClientGUI() {
         Thread.setDefaultUncaughtExceptionHandler(this);
@@ -138,15 +145,33 @@ public class ClientGUI extends JFrame implements ActionListener,
         socketThread.sendMessage(Protocol.getUserBroadcast(msg));
     }
 
-    private void wrtMsgToLogFile(String msg, String username) {
-        try (FileWriter out = new FileWriter("log.txt", true)) {
-            out.write(username + ": " + msg + "\n");
-            out.flush();
-        } catch (IOException e) {
-            if (!shownIoErrors) {
-                shownIoErrors = true;
-                showException(Thread.currentThread(), e);
+    private void wrtMsgToLogFile(String msg) {
+        try {
+            if (!Files.exists(logPath)) {
+                Files.createDirectories(logPath);
             }
+            Files.write(logFile, Arrays.asList(msg), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        } catch (IOException e) {
+            e.printStackTrace();
+            showException(Thread.currentThread(), e);
+        }
+    }
+
+    private void restoreMessagesFromLogFile() {
+        try {
+            ArrayList<String> messages;
+            if (!Files.exists(logFile)) {
+                putLog("Missing log file: " + logFile.toString());
+            } else {
+                messages = (ArrayList<String>) Files.readAllLines(logFile);
+                int messagesLimit = Math.min(messages.size(), 100);
+                for (int i = messages.size() - messagesLimit; i < messagesLimit; i++) {
+                    putLog(messages.get(i));
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            showException(Thread.currentThread(), e);
         }
     }
 
@@ -226,6 +251,9 @@ public class ClientGUI extends JFrame implements ActionListener,
                 panelLogin.remove(btnLogin);
                 panelTop.revalidate();
                 panelTop.repaint();
+                logPath = Paths.get("log", arr[1]);
+                logFile = Paths.get(logPath.toString(), "log.txt");
+                restoreMessagesFromLogFile();
                 break;
             case Protocol.AUTH_DENIED:
                 putLog("Authorization failed");
@@ -235,9 +263,11 @@ public class ClientGUI extends JFrame implements ActionListener,
                 socketThread.close();
                 break;
             case Protocol.TYPE_BROADCAST:
-                putLog(String.format("%s%s: %s",
+                String message = String.format("%s%s: %s",
                         DATE_FORMAT.format(Long.parseLong(arr[1])),
-                        arr[2], arr[3]));
+                        arr[2], arr[3]);
+                putLog(message);
+                wrtMsgToLogFile(message);
                 break;
             case Protocol.USER_LIST:
                 String users = msg.substring(Protocol.USER_LIST.length() +

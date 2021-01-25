@@ -126,7 +126,7 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
         String msgType = arr[0];
         switch (msgType) {
             case Protocol.USER_BROADCAST:
-                SqlClient.putMessageToDB(Protocol.getTypeBroadcast(client.getNickname(), arr[1]));
+//                SqlClient.putMessageToDB(Protocol.getTypeBroadcast(client.getNickname(), arr[1]));
                 sendToAllAuthorizedClients(Protocol.getTypeBroadcast(client.getNickname(), arr[1]));
                 break;
             case Protocol.USER_CHANGE_NICKNAME:
@@ -171,10 +171,10 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
             client.authAccept(nickname);
             if (oldClient == null) {
                 sendToAllAuthorizedClients(Protocol.getTypeBroadcast("Server", nickname + " connected"));
-                ArrayList<String> messages = SqlClient.getMessagesFromDB(quantityOfLastMessagesOnUserLogin);
-                for (int i = 0; i < messages.size(); i++) {
-                    client.sendMessage(messages.get(i));
-                }
+//                ArrayList<String> messages = SqlClient.getMessagesFromDB(quantityOfLastMessagesOnUserLogin);
+//                for (int i = 0; i < messages.size(); i++) {
+//                    client.sendMessage(messages.get(i));
+//                }
             } else {
                 oldClient.reconnect();
                 clients.remove(oldClient);
