@@ -1,8 +1,11 @@
 public class Car implements Runnable {
+    private static final String NAME_PREFIX;
+    public static volatile int ID;
     private static int CARS_COUNT;
 
     static {
         CARS_COUNT = 0;
+        NAME_PREFIX = "Участник #";
     }
 
     private Race race;
@@ -13,7 +16,7 @@ public class Car implements Runnable {
         this.race = race;
         this.speed = speed;
         CARS_COUNT++;
-        this.name = "Участник #" + CARS_COUNT;
+        this.name = NAME_PREFIX + CARS_COUNT;
     }
 
     public String getName() {
@@ -27,14 +30,18 @@ public class Car implements Runnable {
     @Override
     public void run() {
         try {
+            MainClass.STAGE.register();
             System.out.println(this.name + " готовится");
             Thread.sleep(500 + (int) (Math.random() * 800));
             System.out.println(this.name + " готов");
-        } catch (Exception e) {
+            MainClass.STAGE.arriveAndAwaitAdvance();
+            for (int i = 0; i < race.getStages().size(); i++) {
+                race.getStages().get(i).go(this);
+            }
+            if (MainClass.STAGE.getArrivedParties() == 0) ID = Integer.parseInt(name.substring(NAME_PREFIX.length()));
+            MainClass.STAGE.arrive();
+        } catch (InterruptedException e) {
             e.printStackTrace();
-        }
-        for (int i = 0; i < race.getStages().size(); i++) {
-            race.getStages().get(i).go(this);
         }
     }
 }
