@@ -34,12 +34,12 @@ public class Tester {
             testClassMethod.setAccessible(true);
             Annotation[] anno = testClassMethod.getDeclaredAnnotations();
             for (Annotation annotation : anno) {
-                if (annotation instanceof BeforeSuite) {
+                if (annotation instanceof BeforeSuite && !result.containsKey(Integer.MAX_VALUE)) {
                     result.put(Integer.MAX_VALUE, new ArrayList<>(Collections.singleton(testClassMethod)));
-                }
-                if (annotation instanceof AfterSuite) {
+                } else throw new RuntimeException("2 or more annotations BeforeSuite");
+                if (annotation instanceof AfterSuite && !result.containsKey(Integer.MIN_VALUE)) {
                     result.put(Integer.MIN_VALUE, new ArrayList<>(Collections.singleton(testClassMethod)));
-                }
+                } else throw new RuntimeException("2 or more annotations AfterSuite");
                 if (annotation instanceof Test) {
                     int priority = ((Test) annotation).priority();
                     if (result.containsKey(priority)) {
